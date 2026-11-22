@@ -579,7 +579,7 @@ class MainWindow(QMainWindow):
         _fields_lbl = QLabel(tr("Visible fields:"))
         _fields_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:11px;")
         self.srt_fields_combo = CheckableComboBox()
-        self.srt_fields_combo.add_items(SRT_FIELDS)
+        self.srt_fields_combo.add_items([(k, tr(n)) for k, n in SRT_FIELDS])
         self.srt_fields_combo.setStyleSheet("font-size:11px;")
         self.srt_fields_combo.selectionChanged.connect(lambda _: self._refresh_preview())
 
@@ -686,17 +686,17 @@ class MainWindow(QMainWindow):
         # Source first - users pick what data they want to show, then the
         # widget type/skin for displaying it.
         row = 0
-        wp.addWidget(_lbl("Source"), row, 0)
+        wp.addWidget(_lbl(tr("Source")), row, 0)
         self.wp_source = QComboBox()
         for key, name, *_ in WIDGET_DATA_SOURCES:
             if key == "gps_track":
                 continue   # the GPS map lives in its own dedicated box
-            self.wp_source.addItem(name, key)
+            self.wp_source.addItem(tr(name), key)
         self.wp_source.currentIndexChanged.connect(self._on_widget_prop_changed)
         wp.addWidget(self.wp_source, row, 1, 1, 2)
         row += 1
 
-        wp.addWidget(_lbl("Type"), row, 0)
+        wp.addWidget(_lbl(tr("Type")), row, 0)
         self.wp_type = QComboBox()
         self.wp_type.addItem(tr("Digital readout"), tr("digital"))
         self.wp_type.addItem(tr("Linear bar"),       tr("bar"))
@@ -842,10 +842,10 @@ class MainWindow(QMainWindow):
         mrow += 1
 
         # ── Appearance ──────────────────────────────────────────────────
-        mgl.addWidget(_section("APPEARANCE"), mrow, 0, 1, 2)
+        mgl.addWidget(_section(tr("APPEARANCE")), mrow, 0, 1, 2)
         mrow += 1
 
-        mgl.addWidget(_lbl("Underlay"), mrow, 0)
+        mgl.addWidget(_lbl(tr("Underlay")), mrow, 0)
         self.map_underlay = QComboBox()
         self.map_underlay.addItem(tr("None (track only)"), tr("none"))
         self.map_underlay.addItem(tr("Street map (OSM)"),  tr("street"))
@@ -858,7 +858,7 @@ class MainWindow(QMainWindow):
         mgl.addWidget(self.map_underlay, mrow, 1)
         mrow += 1
 
-        mgl.addWidget(_lbl("Marker"), mrow, 0)
+        mgl.addWidget(_lbl(tr("Marker")), mrow, 0)
         self.map_marker = QComboBox()
         self.map_marker.addItem(tr("Dot"),        tr("dot"))
         self.map_marker.addItem(tr("Quadcopter"), tr("quadcopter"))
@@ -1743,6 +1743,8 @@ class MainWindow(QMainWindow):
         nxt = 'zh' if i18n.get_language() == 'en' else 'en'
         i18n.set_language(nxt)
         i18n.apply_language()
+        if hasattr(self, '_refresh_widget_list'):
+            self._refresh_widget_list()
         self.setWindowTitle(f"VueOSD v{VERSION} — " + tr("Digital FPV OSD Tool"))
         self._lang_btn.setText(i18n.toggle_label())
 
@@ -2364,7 +2366,7 @@ class MainWindow(QMainWindow):
                 continue
             src_label = next((name for k, name, *_ in WIDGET_DATA_SOURCES
                               if k == w.source), w.source)
-            item = QListWidgetItem(f"{w.type} · {src_label}")
+            item = QListWidgetItem(f"{tr(w.type)} · {tr(src_label)}")
             item.setData(Qt.ItemDataRole.UserRole, i)
             self.widget_list.addItem(item)
         self.widget_list.blockSignals(False)

@@ -199,6 +199,57 @@ ZH = {
     '＋ Add': '＋ 添加',
     '🎨': '🎨',
     '🔍  Diagnose OSD glyphs': '🔍  诊断 OSD 字符',
+    'APPEARANCE': '外观',
+    'All fields': '全部字段',
+    'Altitude': '高度',
+    'Altitude (OSD)': '高度（OSD）',
+    'Altitude (SRT)': '高度（SRT）',
+    'Bitrate': '码率',
+    'Channel': '信道',
+    'Current (OSD)': '电流（OSD）',
+    'Distance': '距离',
+    'Distance (SRT)': '距离（SRT）',
+    'Flight Time': '飞行时间',
+    'Frame Rate': '帧率',
+    'Frequency': '频率',
+    'GPS sats (OSD)': 'GPS 卫星数（OSD）',
+    'Ground Battery': '地面端电池',
+    'Ground Battery (SRT)': '地面端电池（SRT）',
+    'Ground Errors': '地面错误',
+    'Ground SNR': '地面信噪比',
+    'Ground Temp': '地面温度',
+    'Home distance': '返航距离',
+    'Latency': '延迟',
+    'Map (GPS trace)': '地图（GPS 轨迹）',
+    'Marker': '标记',
+    'No fields': '无字段',
+    'Off': '关闭',
+    'Power (OSD)': '功率（OSD）',
+    'RSSI (OSD)': 'RSSI（OSD）',
+    'Radio 1': '射频 1',
+    'Radio 1 SNR': '射频 1 信噪比',
+    'Radio 1 dBm': '射频 1 dBm',
+    'Radio 2': '射频 2',
+    'Radio 2 SNR': '射频 2 信噪比',
+    'Radio 2 dBm': '射频 2 dBm',
+    'STY Mode': 'STY 模式',
+    'Signal': '信号',
+    'Sky Battery': '天空端电池',
+    'Sky Battery (SRT)': '天空端电池（SRT）',
+    'Sky Errors': '天空错误',
+    'Sky SNR': '天空信噪比',
+    'Sky Temp': '天空温度',
+    'Source': '数据源',
+    'Speed (OSD)': '速度（OSD）',
+    'Throttle % (OSD)': '油门 %（OSD）',
+    'Type': '类型',
+    'Underlay': '底图',
+    'Vert. speed (OSD)': '垂直速度（OSD）',
+    'Voltage': '电压',
+    'Voltage (OSD)': '电压（OSD）',
+    'Voltage (SRT)': '电压（SRT）',
+    'fields': '个字段',
+    'mAh drawn (OSD)': '已用容量（OSD）',
 }
 
 
@@ -281,6 +332,11 @@ def apply_language() -> None:
                 new = conv(cur)
                 if new != cur:
                     widget.setTitle(new)
+            except Exception:
+                pass
+        if hasattr(widget, 'retranslate'):        # CheckableComboBox
+            try:
+                widget.retranslate()
             except Exception:
                 pass
         retext(widget, 'statusTip', 'setStatusTip')

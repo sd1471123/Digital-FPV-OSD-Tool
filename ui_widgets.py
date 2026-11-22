@@ -225,14 +225,24 @@ class CheckableComboBox(QComboBox):
     def add_items(self, items: list[tuple[str, str]]):
         """Add (key, label) pairs as checkable items, all checked by default."""
         self._keys.clear()
+        self._labels = []
         self._model.clear()
         for key, label in items:
+            self._labels.append(label)
             item = QStandardItem(label)
             item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             item.setData(Qt.CheckState.Checked, Qt.ItemDataRole.CheckStateRole)
             item.setData(key, Qt.ItemDataRole.UserRole)
             self._model.appendRow(item)
             self._keys.append(key)
+
+    def retranslate(self):
+        """Refresh item labels after a language switch."""
+        from i18n import tr
+        for i, label in enumerate(getattr(self, '_labels', [])):
+            item = self._model.item(i)
+            if item is not None:
+                item.setText(tr(label))
 
     def checked_keys(self) -> set[str]:
         """Return set of keys for currently checked items."""
@@ -263,14 +273,15 @@ class CheckableComboBox(QComboBox):
         painter = QStylePainter(self)
         opt = QStyleOptionComboBox()
         self.initStyleOption(opt)
+        from i18n import tr
         total = self._model.rowCount()
         checked = len(self.checked_keys())
         if checked == 0:
-            opt.currentText = "No fields"
+            opt.currentText = tr("No fields")
         elif checked == total:
-            opt.currentText = "All fields"
+            opt.currentText = tr("All fields")
         else:
-            opt.currentText = f"{checked} / {total} fields"
+            opt.currentText = f"{checked} / {total} " + tr("fields")
         painter.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opt)
         painter.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
 

@@ -35,6 +35,7 @@ ZH = {
     'Copy this report and share it so the firmware symbol table can be corrected:': '复制此报告并分享，以便修正固件符号表：',
     'Copy to clipboard': '复制到剪贴板',
     'Custom': '自定义',
+    'Custom Widgets': '自定义组件',
     'Detected BetaFPV P1 — extracting embedded OSD…': '检测到 BetaFPV P1——正在提取内嵌 OSD…',
     'Detecting…': '检测中…',
     'Digital FPV OSD Tool': '数字 FPV OSD 工具',
@@ -59,8 +60,10 @@ ZH = {
     "Fetch the bundled font pack (BTFL / INAV / ArduPilot) from the project's GitHub releases and install it into the fonts/ folder.": '从项目的 GitHub Releases 获取内置字体包（BTFL / INAV / ArduPilot），并安装到 fonts/ 目录。',
     'File Already Exists': '文件已存在',
     'Fine-tune Position & Scale': '微调位置与缩放',
+    'Files': '文件',
     'Font download failed': '字体下载失败',
     'Fonts installed': '字体已安装',
+    'OSD Font': 'OSD 字体',
     'Go to end (End)': '跳到结尾（End）',
     'Go to start (Home)': '跳到开头（Home）',
     'HD tiles': '高清瓦片',
@@ -72,10 +75,12 @@ ZH = {
     'Install FFmpeg with your package manager:\n\n  Ubuntu/Debian:  sudo apt install ffmpeg\n  Fedora:         sudo dnf install ffmpeg\n  Arch:           sudo pacman -S ffmpeg\n  macOS:          brew install ffmpeg\n\nThen restart the app.': '使用包管理器安装 FFmpeg：\n\n  Ubuntu/Debian:  sudo apt install ffmpeg\n  Fedora:         sudo dnf install ffmpeg\n  Arch:           sudo pacman -S ffmpeg\n  macOS:          brew install ffmpeg\n\n然后重启本程序。',
     'Install Failed': '安装失败',
     'Linear bar': '线性条',
+    'Link Status Bar': '链路状态栏',
     'Load an .osd file first — the diagnostic reads the current OSD frame.': '请先加载 .osd 文件——诊断功能会读取当前 OSD 帧。',
     'Loading OSD parser…': '正在加载 OSD 解析器…',
     'Loading font engine…': '正在加载字体引擎…',
     'Loading video pipeline…': '正在加载视频管线…',
+    'GPS Map': 'GPS 地图',
     'Building interface…': '正在构建界面…',
     'Checking FFmpeg…': '正在检查 FFmpeg…',
     'Mbit/s:': '兆位/秒：',
@@ -86,6 +91,7 @@ ZH = {
     'No file selected': '未选择文件',
     'No font loaded': '未加载字体',
     'None (track only)': '无（仅显示轨迹）',
+    'Opacity': '不透明度',
     'OSD auto-fitted to video height, centred.': 'OSD 已按视频高度自动适配并居中。',
     'OSD diagnostic': 'OSD 诊断',
     'OSD glyph diagnostic': 'OSD 字符诊断',
@@ -103,6 +109,9 @@ ZH = {
     'Quadcopter': '四轴飞行器',
     'R / G / B:  1.00 / 1.00 / 1.00': 'R / G / B：1.00 / 1.00 / 1.00',
     'RGB Multipliers': 'RGB 倍率',
+    'Red': '红',
+    'Green': '绿',
+    'Blue': '蓝',
     "Radio signal, bitrate, GPS, altitude from .srt.\n'No MAVLink telemetry' lines are hidden.": '从 .srt 读取信号、码率、GPS、高度。\n“No MAVLink telemetry” 行会被隐藏。',
     'Ready': '就绪',
     'Reading video info…': '正在读取视频信息…',
@@ -120,6 +129,7 @@ ZH = {
     'Save as:  ⚠ that file also exists — pick a different name': '另存为：⚠ 该文件已存在——请选择其他名称',
     'Save with this name': '使用此名称保存',
     'Save…': '保存…',
+    'Scale': '缩放',
     'Scale the output video to a higher resolution using Lanczos.\nUseful when source is 1080p and you want a sharper result on a high-res display.': '使用 Lanczos 算法将输出视频放大到更高分辨率。\n适用于源视频为 1080p、希望在高清屏幕上获得更清晰效果的场景。',
     'Scan the current OSD frame for digit runs and report the icon glyph IDs adjacent to them. Use this when an OSD-sourced widget shows nothing.': '扫描当前 OSD 帧中的数字串，并报告其旁边的图标字符 ID。当某个基于 OSD 的组件无内容显示时可使用此功能。',
     'Select a video file.': '请选择视频文件。',
@@ -128,6 +138,7 @@ ZH = {
     'Shift OSD timestamps relative to video.\n+500 ms → OSD shows data 500 ms later (compensates OSD lagging behind).\n−500 ms → OSD shows data 500 ms earlier.\nOnboard video + ground-recorded .osd/.srt: set this to how long the\nground recording had been running when the onboard recording started\n(often tens of seconds).': '相对视频平移 OSD 时间戳。\n+500 毫秒 → OSD 数据延后 500 毫秒显示（补偿 OSD 滞后）。\n−500 毫秒 → OSD 数据提前 500 毫秒显示。\n机载视频 + 地面录制的 .osd/.srt：请将此值设为机载录制开始时\n地面录制已运行的时长（通常为数十秒）。',
     'Show OSD glyphs': '显示 OSD 字符',
     'Show link status bar': '显示链路状态栏',
+    'Size': '尺寸',
     'Show or hide the GPS map overlay on the video.': '显示或隐藏视频上的 GPS 地图叠加层。',
     'Starting…': '正在启动…',
     'Step back 1 frame (←)': '后退一帧（←）',
@@ -143,6 +154,8 @@ ZH = {
     'Toggle light / dark theme': '切换浅色 / 深色主题',
     'UI scale': '界面缩放',
     'Unlock the layout to drag and resize widgets — including the GPS map — directly on the video preview. Click again to lock.': '解锁布局后，可直接在视频预览上拖动并调整组件大小（包括 GPS 地图）。再次点击可锁定。',
+    'X offset': 'X 偏移',
+    'Y offset': 'Y 偏移',
     'Update failed': '更新失败',
     'Update installed': '更新已安装',
     'Update now': '立即更新',
@@ -260,7 +273,16 @@ def apply_language() -> None:
     for widget in QApplication.allWidgets():
         retext(widget, 'windowTitle', 'setWindowTitle')
         retext(widget, 'text', 'setText')
+        retext(widget, 'title', 'setTitle')
         retext(widget, 'toolTip', 'setToolTip')
+        if hasattr(widget, 'titleText'):          # CollapsibleGroupBox
+            try:
+                cur = widget.titleText()
+                new = conv(cur)
+                if new != cur:
+                    widget.setTitle(new)
+            except Exception:
+                pass
         retext(widget, 'statusTip', 'setStatusTip')
         retext(widget, 'placeholderText', 'setPlaceholderText')
 

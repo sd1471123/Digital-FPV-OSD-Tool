@@ -477,7 +477,7 @@ class MainWindow(QMainWindow):
         ll.addLayout(hdr_row)
 
         # ── Files group ───────────────────────────────────────────────────────
-        fg = CollapsibleGroupBox("Files")
+        fg = CollapsibleGroupBox(tr("Files"))
         fg.setStyleSheet(S.GROUP_STYLE)
         fgl = QVBoxLayout(fg)
         fgl.setSpacing(4)
@@ -506,7 +506,7 @@ class MainWindow(QMainWindow):
         ll.addWidget(fg)
 
         # ── OSD Font group ────────────────────────────────────────────────────
-        fontg = CollapsibleGroupBox("OSD Font")
+        fontg = CollapsibleGroupBox(tr("OSD Font"))
         fontg.setStyleSheet(S.GROUP_STYLE)
         fontgl = QVBoxLayout(fontg)
         fontgl.setSpacing(6)
@@ -559,7 +559,7 @@ class MainWindow(QMainWindow):
         ll.addWidget(fontg)
 
         # ── Link Status Bar ───────────────────────────────────────────────────
-        srtg = CollapsibleGroupBox("Link Status Bar")
+        srtg = CollapsibleGroupBox(tr("Link Status Bar"))
         srtg.setStyleSheet(S.GROUP_STYLE)
         srtgl = QVBoxLayout(srtg)
         srtgl.setSpacing(4)
@@ -570,10 +570,10 @@ class MainWindow(QMainWindow):
         self.srt_bar_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.srt_bar_check.stateChanged.connect(self._refresh_preview)
 
-        self.srt_opacity_sl = LabeledSlider("Opacity", 10, 100, 60, "%")
+        self.srt_opacity_sl = LabeledSlider(tr("Opacity"), 10, 100, 60, "%")
         self.srt_opacity_sl.valueChanged.connect(self._refresh_preview)
 
-        self.srt_size_sl = LabeledSlider("Size", 50, 200, 100, "%")
+        self.srt_size_sl = LabeledSlider(tr("Size"), 50, 200, 100, "%")
         self.srt_size_sl.valueChanged.connect(self._refresh_preview)
 
         _fields_lbl = QLabel(tr("Visible fields:"))
@@ -611,7 +611,7 @@ class MainWindow(QMainWindow):
         properties section for the currently selected widget.
         """
         t = _T()
-        wg = CollapsibleGroupBox("Custom Widgets")
+        wg = CollapsibleGroupBox(tr("Custom Widgets"))
         wg.setStyleSheet(S.GROUP_STYLE)
         wgl = QVBoxLayout(wg)
         wgl.setSpacing(4)
@@ -809,7 +809,7 @@ class MainWindow(QMainWindow):
         # no GPS (no SRT lat/lon, OSD lat/lon, or Plus Code). The map is still
         # a widget under the hood (draggable on the canvas), but it's created,
         # sized, and styled here rather than from the widget list.
-        mapg = CollapsibleGroupBox("GPS Map")
+        mapg = CollapsibleGroupBox(tr("GPS Map"))
         mapg.setStyleSheet(S.GROUP_STYLE)
         self.map_group = mapg
         mgl = QGridLayout(mapg)
@@ -1003,9 +1003,9 @@ class MainWindow(QMainWindow):
         self.osd_show_check.stateChanged.connect(self._refresh_preview)
         posgl.addWidget(self.osd_show_check)
 
-        self.sl_x     = LabeledSlider("X offset", -1200, 1200, 0, " px")
-        self.sl_y     = LabeledSlider("Y offset",  -800,  800, 0, " px")
-        self.sl_scale = LabeledSlider("Scale",      50, 150, 100, "%")
+        self.sl_x     = LabeledSlider(tr("X offset"), -1200, 1200, 0, " px")
+        self.sl_y     = LabeledSlider(tr("Y offset"),  -800,  800, 0, " px")
+        self.sl_scale = LabeledSlider(tr("Scale"),      50, 150, 100, "%")
         for sl in (self.sl_x, self.sl_y, self.sl_scale):
             sl.valueChanged.connect(self._queue_preview)
             posgl.addWidget(sl)
@@ -2944,9 +2944,9 @@ class MainWindow(QMainWindow):
         note.setStyleSheet(f"color:{t['muted']};font-size:10px;")
         vl.addWidget(note)
 
-        r_sl = LabeledSlider("Red", 0, 400, self.cc_r.value())
-        g_sl = LabeledSlider("Green", 0, 400, self.cc_g.value())
-        b_sl = LabeledSlider("Blue", 0, 400, self.cc_b.value())
+        r_sl = LabeledSlider(tr("Red"), 0, 400, self.cc_r.value())
+        g_sl = LabeledSlider(tr("Green"), 0, 400, self.cc_g.value())
+        b_sl = LabeledSlider(tr("Blue"), 0, 400, self.cc_b.value())
 
         # Show values as x.xx instead of raw int
         def _fmt(sl, v):

@@ -25,9 +25,7 @@ HUD elements directly onto the footage — frame-accurate, GPU-accelerated.
 - Betaflight, INAV & ArduPilot font support (SneakyFPV HD fonts included)
 - Firmware auto-detected from OSD file header
 - WTFOS / DJI O3 support (auto-detected 60×22 grid)
-- BetaFPV P1 embedded OSD support (MP4 **and** MPEG-TS container)
-- HGLRC Draco (化骨龙龙瞰) `.ts` recording support — embedded OSD read directly from TS
-- Simplified Chinese / English UI with instant switching and saved preference
+- BetaFPV P1 embedded OSD support
 - Compatible with [Ruby FPV](https://rubyfpv.com/) and [Onyx FPV](https://onyxfpv.com/) (standard MSP-OSD format)
 - SRT telemetry bar (speed, altitude, satellites, signal)
 - GPU-accelerated encoding (NVIDIA NVENC, AMD AMF, Intel QSV, VAAPI, VideoToolbox) with automatic CPU fallback

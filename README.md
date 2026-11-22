@@ -24,9 +24,7 @@
 - 支持 Betaflight、INAV 与 ArduPilot 字体（内置 SneakyFPV 高清字体）
 - 从 OSD 文件头自动识别固件
 - WTFOS / DJI O3 支持（自动识别 60×22 网格）
-- BetaFPV P1 内嵌 OSD 支持（MP4 **和** MPEG-TS 容器）
-- 化骨龙龙瞰（HGLRC Draco）`.ts` 录制文件支持——直接读取 TS 内嵌 OSD
-- 简体中文 / 英文界面，即时切换并自动保存
+- BetaFPV P1 内嵌 OSD 支持
 - 兼容 [Ruby FPV](https://rubyfpv.com/) 与 [Onyx FPV](https://onyxfpv.com/)（标准 MSP-OSD 格式）
 - SRT 遥测信息栏（速度、高度、卫星数、信号）
 - GPU 硬件加速编码（NVIDIA NVENC、AMD AMF、Intel QSV、VAAPI、VideoToolbox），自动回退 CPU

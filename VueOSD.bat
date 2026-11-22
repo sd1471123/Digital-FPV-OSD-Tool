@@ -1,20 +1,21 @@
 @echo off
 cd /d "%~dp0"
-title VueOSD — Digital FPV OSD Tool
+title VueOSD - Digital FPV OSD Tool
 
 set SFPATH=%TEMP%\vueosd_splash.txt
 
-:: ── Write initial status and launch HTA splash immediately ───────────────────
+:: -- Write initial status and launch HTA splash immediately -------------------
 echo 2>&1>"%SFPATH%" 5
 echo Starting^&hellip;>>"%SFPATH%"
 start "" mshta.exe "%~dp0assets\splash.hta"
 
-:: ── Check for Python ──────────────────────────────────────────────────────────
+:: -- Check for Python ----------------------------------------------------------
 set PYTHON=
 py --version >nul 2>&1 && set PYTHON=py
 if "%PYTHON%"=="" python --version >nul 2>&1 && set PYTHON=python
+if "%PYTHON%"=="" if exist "%USERPROFILE%\.workbuddy\binaries\python\versions\3.14.3\python.exe" set PYTHON="%USERPROFILE%\.workbuddy\binaries\python\versions\3.14.3\python.exe"
 
-:: ── Install Python if missing ─────────────────────────────────────────────────
+:: -- Install Python if missing -------------------------------------------------
 if "%PYTHON%"=="" (
     echo 12>"%SFPATH%"
     echo Installing Python 3^&hellip;>>"%SFPATH%"
@@ -37,7 +38,7 @@ if "%PYTHON%"=="" (
     )
 )
 
-:: ── Hand off to bootstrap — it closes the HTA and shows PyQt6 splash ─────────
+:: -- Hand off to bootstrap - it closes the HTA and shows PyQt6 splash ---------
 echo 45>"%SFPATH%"
 echo Loading app^&hellip;>>"%SFPATH%"
 

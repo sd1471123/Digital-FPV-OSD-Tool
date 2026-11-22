@@ -66,7 +66,7 @@ ZH = {
     'OSD Font': 'OSD 字体',
     'Go to end (End)': '跳到结尾（End）',
     'Go to start (Home)': '跳到开头（Home）',
-    'HD tiles': '高清瓦片',
+    'HD tiles': '高清字体',
     'Hide OSD Regions': '隐藏 OSD 区域',
     'Hide the MSP OSD glyph grid. Widgets and the SRT bar are unaffected.': '隐藏 MSP OSD 字符网格。自定义组件和 SRT 信息栏不受影响。',
     'Icons by <a href="https://www.flaticon.com/free-icons/wifi-connection" style="color:#2a2a3a;text-decoration:none;">Smashicons – Flaticon</a>  &middot;  Color correction based on <a href="https://github.com/sickgreg/VfxEnc" style="color:#2a2a3a;text-decoration:none;">VfxEnc</a> by sickgreg': '图标来自 <a href="https://www.flaticon.com/free-icons/wifi-connection" style="color:#2a2a3a;text-decoration:none;">Smashicons – Flaticon</a>  &middot;  色彩校正基于 sickgreg 的 <a href="https://github.com/sickgreg/VfxEnc" style="color:#2a2a3a;text-decoration:none;">VfxEnc</a>',

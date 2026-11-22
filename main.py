@@ -360,6 +360,18 @@ class MainWindow(QMainWindow):
         self._update_thread = None
         self._update_worker = None
         QTimer.singleShot(2000, self._start_update_check)
+        # Make sure every visible label matches the saved language on startup.
+        # In a packaged exe the config path differs from source runs, so a
+        # post-build refresh guarantees the UI is translated from the first frame.
+        QTimer.singleShot(0, self._apply_startup_language)
+
+    def _apply_startup_language(self):
+        i18n.load_language()
+        i18n.apply_language()
+        self.setWindowTitle(f"VueOSD v{VERSION} — " + tr("Digital FPV OSD Tool"))
+        self._lang_btn.setText(i18n.toggle_label())
+        if hasattr(self, '_refresh_widget_list'):
+            self._refresh_widget_list()
 
     def _build_left_panel(self) -> "QScrollArea":
         """Build and return the left scrollable panel."""
@@ -709,14 +721,14 @@ class MainWindow(QMainWindow):
         wp.addWidget(self.wp_type, row, 1, 1, 2)
         row += 1
 
-        wp.addWidget(_lbl("Label"), row, 0)
+        wp.addWidget(_lbl(tr("Label")), row, 0)
         self.wp_label = QLineEdit()
         self.wp_label.setPlaceholderText(tr("(no label)"))
         self.wp_label.editingFinished.connect(self._on_widget_prop_changed)
         wp.addWidget(self.wp_label, row, 1, 1, 2)
         row += 1
 
-        wp.addWidget(_lbl("Color"), row, 0)
+        wp.addWidget(_lbl(tr("Color")), row, 0)
         self.wp_color = QLineEdit("#FFFFFF")
         self.wp_color.setMaxLength(9)
         self.wp_color.editingFinished.connect(self._on_widget_prop_changed)
@@ -729,7 +741,7 @@ class MainWindow(QMainWindow):
         wp.addWidget(self.wp_color_btn, row, 2)
         row += 1
 
-        wp.addWidget(_lbl("Min / Max"), row, 0)
+        wp.addWidget(_lbl(tr("Min / Max")), row, 0)
         mm_row = QHBoxLayout()
         mm_row.setSpacing(3)
         self.wp_min = QDoubleSpinBox()
@@ -756,7 +768,7 @@ class MainWindow(QMainWindow):
         wp.addWidget(mm_w, row, 1, 1, 2)
         row += 1
 
-        wp.addWidget(_lbl("Width"), row, 0)
+        wp.addWidget(_lbl(tr("Width")), row, 0)
         self.wp_w = QSlider(Qt.Orientation.Horizontal)
         self.wp_w.setRange(2, 60)      # 2-60% of source width
         self.wp_w.setValue(15)
@@ -764,7 +776,7 @@ class MainWindow(QMainWindow):
         wp.addWidget(self.wp_w, row, 1, 1, 2)
         row += 1
 
-        wp.addWidget(_lbl("Height"), row, 0)
+        wp.addWidget(_lbl(tr("Height")), row, 0)
         self.wp_h = QSlider(Qt.Orientation.Horizontal)
         self.wp_h.setRange(2, 60)
         self.wp_h.setValue(8)
@@ -876,7 +888,7 @@ class MainWindow(QMainWindow):
 
         # Size sliders run the full 5–100%: at 100% the map matches the video
         # width/height exactly (geometry is centred, so it fills the frame).
-        mgl.addWidget(_lbl("Width"), mrow, 0)
+        mgl.addWidget(_lbl(tr("Width")), mrow, 0)
         self.map_w = QSlider(Qt.Orientation.Horizontal)
         self.map_w.setRange(5, 100)
         self.map_w.setValue(30)
@@ -884,7 +896,7 @@ class MainWindow(QMainWindow):
         mgl.addWidget(self.map_w, mrow, 1)
         mrow += 1
 
-        mgl.addWidget(_lbl("Height"), mrow, 0)
+        mgl.addWidget(_lbl(tr("Height")), mrow, 0)
         self.map_h = QSlider(Qt.Orientation.Horizontal)
         self.map_h.setRange(5, 100)
         self.map_h.setValue(30)
@@ -1162,20 +1174,20 @@ class MainWindow(QMainWindow):
             setattr(self, attr, cb)
 
         # Reverse ColorTrans sub-section
-        _check("cc_reverse", "Reverse ColorTrans", checked=True)
-        _slider("cc_yoff",  "Y-offset",  0, 100, 25, "%")
-        _slider("cc_blift", "Blk lift",  0, 100, 20)
+        _check("cc_reverse", tr("Reverse ColorTrans"), checked=True)
+        _slider("cc_yoff",  tr("Y-offset"),  0, 100, 25, "%")
+        _slider("cc_blift", tr("Blk lift"),  0, 100, 20)
 
         ccl.addWidget(_sep())
 
         # Grading sliders
-        _slider("cc_brightness", "Bright",   -100, 100, 0)
-        _slider("cc_contrast",   "Contrast",  0, 300, 100, "%")
-        _slider("cc_gamma",      "Gamma",     10, 300, 100)
-        _slider("cc_lift",       "Lift",      -100, 100, -15)
-        _slider("cc_gain",       "Gain",      0, 500, 175)
-        _slider("cc_hue",        "Hue",       -180, 180, 0, "°")
-        _slider("cc_sat",        "Satur.",    -100, 100, -22)
+        _slider("cc_brightness", tr("Bright"),   -100, 100, 0)
+        _slider("cc_contrast",   tr("Contrast"),  0, 300, 100, "%")
+        _slider("cc_gamma",      tr("Gamma"),     10, 300, 100)
+        _slider("cc_lift",       tr("Lift"),      -100, 100, -15)
+        _slider("cc_gain",       tr("Gain"),      0, 500, 175)
+        _slider("cc_hue",        tr("Hue"),       -180, 180, 0, "°")
+        _slider("cc_sat",        tr("Satur."),    -100, 100, -22)
 
         # RGB multipliers — button opens popup dialog
         self._cc_rgb_btn = QPushButton(tr("R / G / B:  1.00 / 1.00 / 1.00"))
@@ -3178,7 +3190,7 @@ class MainWindow(QMainWindow):
         self.cc_glsl_row.set_path("")
         self._cc_glsl_warn.setVisible(False)
         # Select Reverse ColorTrans preset if it exists
-        idx = self.cc_preset_cb.findText("Reverse ColorTrans")
+        idx = self.cc_preset_cb.findText(tr("Reverse ColorTrans"))
         if idx >= 0:
             self.cc_preset_cb.blockSignals(True)
             self.cc_preset_cb.setCurrentIndex(idx)

@@ -15,6 +15,7 @@
 - **添加中文界面**：全界面支持简体中文 / English 即时切换（点击标题栏的「中 / EN」按钮），语言选择自动保存，下次启动无需再次切换。
 - **添加对化骨龙龙瞰（HGLRC Draco）图传录制 TS 文件的支持**：可直接读取 `.ts` 录制文件中内嵌的 OSD 数据（MPEG-TS / H.264 SEI，兼容 P1 格式），无需先转换成 MP4。
 - **修复 Intel 显卡硬件渲染出错的 BUG**：修正 GPU 检测逻辑，避免 Intel 显卡被误判为 AMD AMF 导致 QSV 无法勾选；现在可正确识别并使用 Intel QSV（Arc / HD / Iris）。
+- **修复 build.bat 打包报错**：原脚本硬性要求不存在的 `.venv` / `run.bat`，现已改为自动检测可用 Python 直接打包，无需 venv。
 
 ---
 

@@ -16,6 +16,7 @@ HUD elements directly onto the footage — frame-accurate, GPU-accelerated.
 - **Simplified Chinese UI**: full Chinese / English instant switching (click the 中 / EN button in the title bar). The choice is saved and restored on next launch.
 - **HGLRC Draco (化骨龙龙瞰) `.ts` recording support**: reads the OSD embedded in `.ts` recordings directly (MPEG-TS / H.264 SEI, P1-compatible) — no MP4 conversion needed.
 - **Intel GPU rendering bug fixed**: corrected GPU detection so Intel cards are no longer misdetected as AMD AMF (which prevented QSV from being selectable). Intel QSV (Arc / HD / Iris) is now detected and usable.
+- **build.bat fixed**: the original script required a non-existent `.venv` / `run.bat`. It now detects an available Python and builds directly — no venv needed.
 
 ---
 

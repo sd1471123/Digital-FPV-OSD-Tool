@@ -5,9 +5,27 @@ active translation at widget creation time; ``apply_language()`` re-translates
 already visible widgets/actions in place when the user switches language.
 """
 import json
+import os
+import sys
 from pathlib import Path
 
-_LANG_FILE = Path(__file__).with_name('language.json')
+
+def _config_dir() -> Path:
+    """Writable location for the language setting, works in a PyInstaller exe."""
+    if getattr(sys, 'frozen', False):                 # packaged .exe
+        exe_dir = Path(sys.executable).parent
+        try:
+            probe = exe_dir / '.write_test'
+            probe.write_text('', encoding='utf-8')
+            probe.unlink()
+            return exe_dir                            # next to the .exe
+        except OSError:
+            pass
+        return Path(os.environ.get('APPDATA', str(Path.home()))) / 'VueOSD'
+    return Path(__file__).parent                      # running from source
+
+
+_LANG_FILE = _config_dir() / 'language.json'
 _CURRENT = 'en'
 
 ZH = {
@@ -325,6 +343,7 @@ def set_language(lang: str) -> None:
     global _CURRENT
     _CURRENT = 'zh' if lang == 'zh' else 'en'
     try:
+        _LANG_FILE.parent.mkdir(parents=True, exist_ok=True)
         _LANG_FILE.write_text(
             json.dumps({'language': _CURRENT}, ensure_ascii=False),
             encoding='utf-8')

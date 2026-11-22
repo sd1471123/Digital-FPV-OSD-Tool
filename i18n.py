@@ -332,6 +332,13 @@ def set_language(lang: str) -> None:
         pass
 
 
+# Load the saved language as soon as this module is imported.  The app is
+# normally launched through bootstrap.py, which imports main.py directly and
+# therefore never calls main.py's main() (the old home of load_language()).
+# Doing it here guarantees the choice survives restarts on every launch path.
+load_language()
+
+
 def tr(text: str) -> str:
     """Translate *text* into the active language (unknown text is unchanged)."""
     if _CURRENT == 'zh':

@@ -6,6 +6,13 @@ Reads `.osd` and `.srt` files recorded alongside your DVR video and renders the
 HUD elements directly onto the footage — frame-accurate, GPU-accelerated.
 ![VueOSD](https://github.com/user-attachments/assets/eab2d3aa-94e0-401b-9568-39ad38457fd3)
 
+---
+
+## 本分支更新内容 / What's New in This Fork
+
+- **添加中文界面**：全界面支持简体中文 / English 即时切换（点击标题栏的「中 / EN」按钮），语言选择自动保存，下次启动无需再次切换。
+- **添加对化骨龙龙瞰（HGLRC Draco）图传录制 TS 文件的支持**：可直接读取 `.ts` 录制文件中内嵌的 OSD 数据（MPEG-TS / H.264 SEI，兼容 P1 格式），无需先转换成 MP4。
+- **修复 Intel 显卡硬件渲染出错的 BUG**：修正 GPU 检测逻辑，避免 Intel 显卡被误判为 AMD AMF 导致 QSV 无法勾选；现在可正确识别并使用 Intel QSV（Arc / HD / Iris）。
 
 ---
 
@@ -15,7 +22,9 @@ HUD elements directly onto the footage — frame-accurate, GPU-accelerated.
 - Betaflight, INAV & ArduPilot font support (SneakyFPV HD fonts included)
 - Firmware auto-detected from OSD file header
 - WTFOS / DJI O3 support (auto-detected 60×22 grid)
-- BetaFPV P1 embedded OSD support
+- BetaFPV P1 embedded OSD support (MP4 **and** MPEG-TS container)
+- HGLRC Draco (化骨龙龙瞰) `.ts` recording support — embedded OSD read directly from TS
+- Simplified Chinese / English UI with instant switching and saved preference
 - Compatible with [Ruby FPV](https://rubyfpv.com/) and [Onyx FPV](https://onyxfpv.com/) (standard MSP-OSD format)
 - SRT telemetry bar (speed, altitude, satellites, signal)
 - GPU-accelerated encoding (NVIDIA NVENC, AMD AMF, Intel QSV, VAAPI, VideoToolbox) with automatic CPU fallback
@@ -107,7 +116,8 @@ player.py            Video player widgets (canvas, timeline, transport)
 video_processor.py   FFmpeg pipeline, GPU detection, encoding
 osd_renderer.py      Numpy-based OSD compositor (~1 ms/frame)
 osd_parser.py        .osd binary format parser
-p1_osd_parser.py     BetaFPV P1 embedded OSD extractor
+p1_osd_parser.py     BetaFPV P1 embedded OSD extractor (MP4 + MPEG-TS)
+i18n.py              Chinese / English translations and language switching
 srt_parser.py        .srt telemetry parser
 font_loader.py       OSD font loader (multi-column HD fonts)
 fonts/               OSD font packs (Betaflight, INAV, ArduPilot)

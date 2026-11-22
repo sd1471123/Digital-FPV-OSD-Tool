@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024-2025 VueOSD — https://github.com/wkumik/Digital-FPV-OSD-Tool
+from i18n import tr
 """
 _player_views.py — Passive view widgets for the player module.
 
@@ -721,38 +722,38 @@ class TransportBar(QWidget):
         self.restart_btn.setIcon(self._icon("back.png", 20))
         self.restart_btn.setFixedSize(34, 34)
         self.restart_btn.setStyleSheet(self._btn_play())
-        self.restart_btn.setToolTip("Go to start (Home)")
+        self.restart_btn.setToolTip(tr("Go to start (Home)"))
         self.restart_btn.clicked.connect(self.restartClicked)
 
         self.step_back_btn = QPushButton()
         self.step_back_btn.setIcon(self._icon("back.png", 16))
         self.step_back_btn.setFixedSize(30, 34)
         self.step_back_btn.setStyleSheet(self._btn_play())
-        self.step_back_btn.setToolTip("Step back 1 frame (\u2190)")
+        self.step_back_btn.setToolTip(tr("Step back 1 frame (\u2190)"))
         self.step_back_btn.clicked.connect(self.stepBackClicked)
 
         self.play_btn = QPushButton()
         self.play_btn.setIcon(self._icon("play.png", 22))
         self.play_btn.setFixedSize(44, 34)
         self.play_btn.setStyleSheet(self._btn_play())
-        self.play_btn.setToolTip("Play / Pause (Space)")
+        self.play_btn.setToolTip(tr("Play / Pause (Space)"))
         self.play_btn.clicked.connect(self.playClicked)
 
         self.step_fwd_btn = QPushButton()
         self.step_fwd_btn.setIcon(self._icon("next.png", 16))
         self.step_fwd_btn.setFixedSize(30, 34)
         self.step_fwd_btn.setStyleSheet(self._btn_play())
-        self.step_fwd_btn.setToolTip("Step forward 1 frame (\u2192)")
+        self.step_fwd_btn.setToolTip(tr("Step forward 1 frame (\u2192)"))
         self.step_fwd_btn.clicked.connect(self.stepFwdClicked)
 
         self.skip_btn = QPushButton()
         self.skip_btn.setIcon(self._icon("next.png", 20))
         self.skip_btn.setFixedSize(34, 34)
         self.skip_btn.setStyleSheet(self._btn_play())
-        self.skip_btn.setToolTip("Go to end (End)")
+        self.skip_btn.setToolTip(tr("Go to end (End)"))
         self.skip_btn.clicked.connect(self.skipEndClicked)
 
-        self.time_lbl = QLabel("0:00 / 0:00")
+        self.time_lbl = QLabel(tr("0:00 / 0:00"))
         t = self._T()
         self.time_lbl.setStyleSheet(
             f"color:{t['text']};font-size:11px;font-weight:bold;"
@@ -760,10 +761,10 @@ class TransportBar(QWidget):
         self.time_lbl.setFixedWidth(100)
         self.time_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.info_lbl = QLabel("t = 0.0s  |  OSD \u2014")
+        self.info_lbl = QLabel(tr("t = 0.0s  |  OSD \u2014"))
         self.info_lbl.setStyleSheet(f"color:{t['muted']};font-size:10px;")
 
-        self.ref_btn = QPushButton("Refresh Preview")
+        self.ref_btn = QPushButton(tr("Refresh Preview"))
         self.ref_btn.setFixedHeight(34)
         self.ref_btn.setMinimumWidth(120)
         self.ref_btn.setStyleSheet(self._btn_sec())
@@ -779,9 +780,9 @@ class TransportBar(QWidget):
             f"QComboBox::drop-down{{border:none;width:18px;}}"
         )
         self.preview_quality_combo.setToolTip(
-            "Cached: scaled-down preview frames, snappy seeking.\n"
+            tr("Cached: scaled-down preview frames, snappy seeking.\n"
             "Original: native source resolution — pixel-accurate but\n"
-            "noticeably slower to scrub on large videos."
+            "noticeably slower to scrub on large videos.")
         )
         self.preview_quality_combo.currentIndexChanged.connect(self.previewQualityChanged)
 

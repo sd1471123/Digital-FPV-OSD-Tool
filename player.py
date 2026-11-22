@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024-2025 VueOSD — https://github.com/wkumik/Digital-FPV-OSD-Tool
+from i18n import tr
 """
 player.py — Video player for VueOSD.
 
@@ -510,14 +511,14 @@ class PlayerPanel(QWidget):
         trim_lay.setContentsMargins(0, 0, 0, 0)
         trim_lay.setSpacing(4)
         t = theme_fn()
-        self.trim_in_lbl = QLabel("In: 0:00")
-        self.trim_out_lbl = QLabel("Out: \u2014")
+        self.trim_in_lbl = QLabel(tr("In: 0:00"))
+        self.trim_out_lbl = QLabel(tr("Out: \u2014"))
         for lb in (self.trim_in_lbl, self.trim_out_lbl):
             lb.setStyleSheet(f"color:{t['subtext']};font-size:10px;font-weight:bold;")
-        self.trim_rst_btn = QPushButton("\u2715")
+        self.trim_rst_btn = QPushButton(tr("\u2715"))
         self.trim_rst_btn.setFixedSize(20, 20)
         self.trim_rst_btn.setStyleSheet(btn_sec_fn())
-        self.trim_rst_btn.setToolTip("Reset trim to full video")
+        self.trim_rst_btn.setToolTip(tr("Reset trim to full video"))
         self.trim_rst_btn.clicked.connect(self.timeline.reset)
 
         trim_lay.addWidget(self.trim_in_lbl)

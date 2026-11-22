@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024-2025 VueOSD — https://github.com/wkumik/Digital-FPV-OSD-Tool
+from i18n import tr
 """
 theme_editor.py — Colour palette editor for VueOSD.
 
@@ -289,7 +290,7 @@ class ThemeEditor(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Theme Editor — VueOSD")
+        self.setWindowTitle(tr("Theme Editor — VueOSD"))
         self.setMinimumSize(860, 640)
         self.resize(920, 720)
         self.setStyleSheet("""
@@ -308,10 +309,10 @@ class ThemeEditor(QDialog):
 
         # ── Header ────────────────────────────────────────────────────────────
         hdr = QHBoxLayout()
-        title = QLabel("Theme Editor")
+        title = QLabel(tr("Theme Editor"))
         title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         title.setStyleSheet("color:#e8e8e0;")
-        sub = QLabel("Click a swatch or type a hex value  •  Changes preview live")
+        sub = QLabel(tr("Click a swatch or type a hex value  •  Changes preview live"))
         sub.setStyleSheet("color:#505060;font-size:11px;")
         hdr.addWidget(title)
         hdr.addStretch()
@@ -357,7 +358,7 @@ class ThemeEditor(QDialog):
         foot = QHBoxLayout()
         foot.setSpacing(8)
 
-        reset_btn = QPushButton("↺  Reset to defaults")
+        reset_btn = QPushButton(tr("↺  Reset to defaults"))
         reset_btn.setStyleSheet(
             "QPushButton{background:#1e1e30;color:#808090;border:1px solid #303040;"
             "border-radius:6px;padding:8px 18px;font-size:11px;}"
@@ -365,7 +366,7 @@ class ThemeEditor(QDialog):
         )
         reset_btn.clicked.connect(self._reset)
 
-        cancel_btn = QPushButton("Cancel")
+        cancel_btn = QPushButton(tr("Cancel"))
         cancel_btn.setStyleSheet(
             "QPushButton{background:#1e1e30;color:#a0a0a0;border:1px solid #303040;"
             "border-radius:6px;padding:8px 20px;font-size:12px;}"
@@ -373,7 +374,7 @@ class ThemeEditor(QDialog):
         )
         cancel_btn.clicked.connect(self.reject)
 
-        apply_btn = QPushButton("✓  Apply & Save")
+        apply_btn = QPushButton(tr("✓  Apply & Save"))
         apply_btn.setStyleSheet(
             "QPushButton{background:#4a7cf0;color:#ffffff;border:none;"
             "border-radius:6px;padding:8px 24px;font-size:12px;font-weight:bold;}"

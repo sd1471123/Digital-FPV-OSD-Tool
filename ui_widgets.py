@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024-2025 VueOSD — https://github.com/wkumik/Digital-FPV-OSD-Tool
+from i18n import tr
 """
 ui_widgets.py — Generic, app-agnostic Qt widgets used across the VueOSD UI.
 
@@ -70,7 +71,7 @@ class FileRow(QWidget):
         self.btn.setStyleSheet(S.BTN_SEC)
         self.btn.clicked.connect(self._browse)
 
-        self.clr = QPushButton("✕")
+        self.clr = QPushButton(tr("✕"))
         self.clr.setFixedSize(28, 28)
         self.clr.setStyleSheet(S.BTN_DANGER)
         self.clr.clicked.connect(lambda: self.set_path(""))
@@ -100,7 +101,7 @@ class FileRow(QWidget):
             self.path_lbl.setToolTip(path)
             self.clr.setVisible(True)
         else:
-            self.path_lbl.setText("No file selected")
+            self.path_lbl.setText(tr("No file selected"))
             self.path_lbl.setStyleSheet(S.PATH_EMPTY)
             self.path_lbl.setToolTip("")
             self.clr.setVisible(False)
@@ -124,7 +125,7 @@ class DropZone(QFrame):
         self.setMinimumHeight(72)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(8, 8, 8, 8)
-        self._lbl = QLabel("Drop  .mp4 · .ts · .osd · .srt  here")
+        self._lbl = QLabel(tr("Drop  .mp4 · .ts · .osd · .srt  here"))
         self._lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._lbl.setStyleSheet(f"color:{_T()['muted']};font-size:11px;")
         lay.addWidget(self._lbl)

@@ -1,10 +1,13 @@
 """
 BetaFPV P1 OSD Parser
 =====================
-Extracts OSD character data embedded in H.264 SEI NAL units inside P1 MP4 files.
+Extracts OSD character data embedded in H.264 SEI NAL units inside P1
+MP4 or MPEG-TS recordings.
 
 FORMAT NOTES (reverse-engineered from Video122.mp4):
-  Container : MP4, single H.264 track, no audio
+  Container : MP4 or MPEG-TS, single H.264 track, no audio
+              MP4  -> AVC length-prefixed NALs inside the mdat box
+              TS   -> 188-byte packets, PES payload with Annex B NALs
   OSD embed : H.264 SEI NAL type 6 → SEI payload type 5 (user_data_unregistered)
   UUID      : bde945dc-b748-d9e6-20d8-2c96efee23d9
   Grid      : 50 cols × 18 rows  (Walksnail Avatar HD compatible)
@@ -65,12 +68,15 @@ class P1OsdFrame:
 
 @dataclass
 class P1OsdData:
-    """Complete parsed OSD data extracted from a P1 MP4 file."""
+    """Complete parsed OSD data extracted from a P1 recording."""
     frames: List[P1OsdFrame]
     grid_cols: int = P1_GRID_COLS
     grid_rows: int = P1_GRID_ROWS
     video_fps: float = 60.0
     duration_ms: int = 0
+    # TS parsing reads exact PES PTS values; MP4 parsing derives time from a
+    # frame counter and needs the GUI to remap it against get_frame_pts().
+    pts_are_final: bool = False
 
     def frame_at(self, time_ms: int) -> Optional[P1OsdFrame]:
         """Return the most recent OSD frame at or before the given time."""
@@ -113,31 +119,28 @@ def _collect_sei_payloads(mdat: bytes) -> List[Tuple[int, bytes]]:
     Walk AVC length-prefixed NAL units in mdat, collect SEI type-5 payloads
     that carry the P1 OSD UUID.
     Returns list of (frame_number, user_data_bytes).
+
+    Every NAL must be consumed by its declared length.  Skipping a NAL by a
+    single byte when its type is unrecognised (e.g. AUD, type 9) desynchronises
+    the walk and hides all following SEI units — P1 recordings from some
+    firmwares emit an AUD before every access unit.
     """
     results = []
     offset = 0
     frame_num = 0
     data_len = len(mdat)
 
-    while offset < data_len - 5:
-        if offset + 4 > data_len:
-            break
+    while offset + 4 <= data_len:
         nal_len = struct.unpack_from('>I', mdat, offset)[0]
         if nal_len == 0 or offset + 4 + nal_len > data_len:
             offset += 1
             continue
 
-        nal_header = mdat[offset + 4]
-        nal_type   = nal_header & 0x1F
-
-        if nal_type not in (1, 5, 6, 7, 8):
-            offset += 1
-            continue
+        nal_type = mdat[offset + 4] & 0x1F
 
         if nal_type in (1, 5):   # coded slice / IDR → increment frame counter
             frame_num += 1
-
-        if nal_type == 6:        # SEI NAL
+        elif nal_type == 6:      # SEI NAL
             payload = mdat[offset + 5 : offset + 4 + nal_len]
             if len(payload) >= 22:
                 user_data = _parse_sei_user_data(payload)
@@ -167,26 +170,131 @@ def _parse_sei_user_data(payload: bytes) -> Optional[bytes]:
         return None
     sei_type += payload[pos]; pos += 1
 
-    # SEI payload size
+    if sei_type != 5:
+        return None                         # not user_data_unregistered
+
+    # SEI payload size.  Most files encode it as FF* + final byte, but P1
+    # firmware also emits "FF FF <UUID>" with no terminating size byte.
+    # Deriving the end from the UUID position handles both variants.
     sei_size = 0
     while pos < len(payload) and payload[pos] == 0xFF:
         sei_size += 255
         pos += 1
-    if pos >= len(payload):
-        return None
-    sei_size += payload[pos]; pos += 1
 
-    if sei_type != 5:
-        return None                         # not user_data_unregistered
-
-    if pos + 16 > len(payload):
-        return None
-    uuid = payload[pos:pos+16]
-    if uuid != P1_SEI_UUID:
-        return None                         # different UUID → not P1 OSD
+    if pos + 16 <= len(payload) and payload[pos:pos+16] == P1_SEI_UUID:
+        end = len(payload)                  # size field omitted its final byte
+    else:
+        if pos >= len(payload):
+            return None
+        sei_size += payload[pos]; pos += 1
+        if pos + 16 > len(payload) or payload[pos:pos+16] != P1_SEI_UUID:
+            return None
+        end = min(len(payload), pos + sei_size)
 
     pos += 16
-    return payload[pos:]                    # return user_data portion
+    raw = payload[pos:end]
+    # Annex B RBSP trailing bit must not leak into the last OSD character.
+    if end == len(payload) and raw and raw[-1] == 0x80:
+        raw = raw[:-1]
+    return raw
+
+
+# ── MPEG-TS / Annex B support ────────────────────────────────────────────────
+
+def _demux_ts_pes(path: str) -> List[Tuple[int, bytes]]:
+    """
+    Reassemble video PES packets from an MPEG-TS recording.
+    Returns [(PTS in 90 kHz ticks, PES packet bytes)] in decode order.
+
+    Some P1 recorders omit the TS pointer_field on video PUSI packets, so we
+    accept both "PES starts at payload[0]" and "pointer_field then PES".
+    """
+    packets: List[Tuple[int, bytes]] = []
+    video_pid = None
+    cur_pid = None
+    cur = bytearray()
+
+    def finish():
+        nonlocal cur
+        if cur and cur_pid == video_pid:
+            packets.append((_pes_pts(bytes(cur)), bytes(cur)))
+        cur = bytearray()
+
+    with open(path, 'rb') as f:
+        while True:
+            pkt = f.read(188)
+            if len(pkt) < 188:
+                break
+            if pkt[0] != 0x47:                      # TS sync byte
+                continue
+
+            pid = ((pkt[1] & 0x1F) << 8) | pkt[2]
+            pusi = bool(pkt[1] & 0x40)
+            afc = (pkt[3] >> 4) & 0x03
+            pos = 4
+            if afc & 2:                             # adaptation field present
+                if pos >= 188:
+                    continue
+                pos += 1 + pkt[pos]
+            if pos >= 188:
+                continue
+            payload = pkt[pos:]
+
+            if pusi:
+                finish()
+                if not payload:
+                    continue
+                if payload[:4] == b'\x00\x00\x01\xe0':
+                    pes = payload                   # no pointer_field
+                else:
+                    pes = payload[1 + payload[0]:]
+                if video_pid is None and pes[:4] == b'\x00\x00\x01\xe0':
+                    video_pid = pid
+                cur_pid = pid
+                cur.extend(pes)
+            elif pid == video_pid:
+                cur.extend(payload)
+    finish()
+    return packets
+
+
+def _pes_pts(pes: bytes) -> int:
+    """Decode the 33-bit PTS from a PES header; 0 when absent."""
+    if len(pes) < 14 or pes[:4] != b'\x00\x00\x01\xe0' or not (pes[7] & 0x80):
+        return 0
+    b = pes[9:14]
+    return (((b[0] >> 1) & 0x07) << 30 | b[1] << 22 | (b[2] >> 1) << 15 |
+            b[3] << 7 | (b[4] >> 1))
+
+
+def _annexb_nals(payload: bytes):
+    """Yield NAL units (including the 1-byte header) from an Annex B byte stream."""
+    starts = []
+    i = 0
+    while i < len(payload) - 3:
+        if payload[i] == 0 and payload[i+1] == 0 and payload[i+2] == 1:
+            starts.append(i + 3)
+            i += 3
+        else:
+            i += 1
+    for idx, start in enumerate(starts):
+        end = starts[idx + 1] if idx + 1 < len(starts) else len(payload)
+        if end > start:
+            yield payload[start:end]
+
+
+def _collect_sei_from_ts(path: str) -> List[Tuple[int, bytes]]:
+    """Return [(PTS ticks, user_data_bytes)] for P1 SEI units inside a TS file."""
+    results = []
+    for pts, pes in _demux_ts_pes(path):
+        body = pes[9 + pes[8]:] if len(pes) > 9 else b''
+        for nal in _annexb_nals(body):
+            if not nal or (nal[0] & 0x1F) != 6:
+                continue
+            user_data = _parse_sei_user_data(nal[1:])
+            if user_data is not None:
+                results.append((pts, user_data))
+    return results
 
 
 # ── Payload decoder ───────────────────────────────────────────────────────────
@@ -251,27 +359,64 @@ def _apply_segments(grid: List[bytearray],
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def detect_p1(mp4_path: str) -> bool:
+def detect_p1(video_path: str) -> bool:
     """
-    Return True if the file is a BetaFPV P1 MP4 with embedded OSD.
+    Return True if the file is a BetaFPV P1 recording (MP4 or TS) with OSD.
     Fast check — reads only the first 8 MB and looks for the P1 UUID.
     """
     try:
-        with open(mp4_path, 'rb') as f:
+        with open(video_path, 'rb') as f:
             chunk = f.read(8 * 1024 * 1024)
         return P1_SEI_UUID in chunk
     except OSError:
         return False
 
 
-def parse_p1_osd(mp4_path: str) -> Optional[P1OsdData]:
+def _parse_p1_ts(path: str) -> Optional[P1OsdData]:
+    """Build OSD frames from the P1 SEI units embedded in an MPEG-TS file."""
+    raw_seis = _collect_sei_from_ts(path)
+    if not raw_seis:
+        return None
+
+    osd_frames: List[P1OsdFrame] = []
+    for pts, raw_payload in raw_seis:
+        segments = _decode_payload(raw_payload)
+        if not segments:
+            continue
+        snapshot = [bytearray(P1_GRID_COLS) for _ in range(P1_GRID_ROWS)]
+        _apply_segments(snapshot, segments)
+        osd_frames.append(P1OsdFrame(
+            time_ms     = pts // 90,        # 90 kHz PTS → milliseconds
+            frame_index = 0,                # TS timestamps need no frame remap
+            grid        = snapshot,
+        ))
+
+    if not osd_frames:
+        return None
+
+    return P1OsdData(
+        frames        = osd_frames,
+        grid_cols     = P1_GRID_COLS,
+        grid_rows     = P1_GRID_ROWS,
+        video_fps     = 60.0,
+        duration_ms   = osd_frames[-1].time_ms,
+        pts_are_final = True,
+    )
+
+
+def parse_p1_osd(video_path: str) -> Optional[P1OsdData]:
     """
-    Extract OSD data from a BetaFPV P1 MP4 file.
+    Extract OSD data from a BetaFPV P1 recording (MP4 or MPEG-TS).
 
     Returns a P1OsdData object (list of timestamped OSD grid snapshots),
     or None if the file doesn't contain P1 OSD data.
     """
-    with open(mp4_path, 'rb') as f:
+    with open(video_path, 'rb') as f:
+        head = f.read(189)
+    if len(head) >= 189 and head[0] == 0x47 and head[188] == 0x47:
+        return _parse_p1_ts(video_path)
+
+    with open(video_path, 'rb') as f:
         data = f.read()
 
     # Find mdat box

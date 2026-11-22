@@ -6,6 +6,8 @@ Parse and overlay MSP-OSD data onto FPV DVR video footage.
 """
 
 import sys, os, math, threading, subprocess, json
+import i18n
+from i18n import tr
 
 # ── Windows: set AppUserModelID so taskbar shows our icon, not Python's ───────
 if sys.platform == "win32":
@@ -315,7 +317,7 @@ class MainWindow(QMainWindow):
         # header reveals BTFL / INAV / ARDU. Used by the OSD glyph decoder.
         self._current_firmware: str = "INAV"
 
-        self.setWindowTitle(f"VueOSD v{VERSION} — Digital FPV OSD Tool")
+        self.setWindowTitle(f"VueOSD v{VERSION} — " + tr("Digital FPV OSD Tool"))
         # App icon — resolved relative to this script so it works from any CWD
         _icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "icon.png")
         if os.path.exists(_icon_path):
@@ -400,7 +402,7 @@ class MainWindow(QMainWindow):
         title_box.setContentsMargins(0, 0, 0, 0)
         title_box.setSpacing(6)
 
-        h1 = QLabel("VueOSD")
+        h1 = QLabel(tr("VueOSD"))
         h1.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
         h1.setStyleSheet(f"color:{_T()['text']};")
         self._h1 = h1
@@ -424,16 +426,16 @@ class MainWindow(QMainWindow):
 
         self._theme_btn = QPushButton()
         self._theme_btn.setFixedSize(28, 28)
-        self._theme_btn.setToolTip("Toggle light / dark theme")
+        self._theme_btn.setToolTip(tr("Toggle light / dark theme"))
         self._theme_btn.setStyleSheet(_btn_css)
         self._theme_btn.setIcon(_icon("moon-dark.png", 16))
         self._theme_btn.clicked.connect(self._toggle_theme)
 
         self._palette_btn = QPushButton()
         self._palette_btn.setFixedSize(28, 28)
-        self._palette_btn.setToolTip("Open theme colour editor")
+        self._palette_btn.setToolTip(tr("Open theme colour editor"))
         self._palette_btn.setStyleSheet(_btn_css)
-        self._palette_btn.setText("🎨")
+        self._palette_btn.setText(tr("🎨"))
         self._palette_btn.setFont(QFont("Segoe UI", 13))
         self._palette_btn.clicked.connect(self._open_theme_editor)
         self._theme_editor_dlg = None   # lazily created
@@ -452,14 +454,23 @@ class MainWindow(QMainWindow):
             f"QComboBox:hover{{color:{_T()['text']};border-color:{_T()['border']};}}"
             f"QComboBox::drop-down{{border:none;width:14px;}}"
         )
-        self._scale_cb.setToolTip("UI scale")
+        self._scale_cb.setToolTip(tr("UI scale"))
         self._scale_cb.currentIndexChanged.connect(self._on_scale_changed)
         # legacy alias for theme reapply code
         self._scale_lbl = QLabel("")
         self._scale_lbl.hide()
 
+        # Language toggle — button displays the language it switches TO
+        self._lang_btn = QPushButton(i18n.toggle_label())
+        self._lang_btn.setFixedSize(30, 28)
+        self._lang_btn.setToolTip("Switch language / 切换语言")
+        self._lang_btn.setStyleSheet(
+            _btn_css + "QPushButton{font-weight:bold;font-size:12px;}")
+        self._lang_btn.clicked.connect(self._toggle_language)
+
         hdr_row.addWidget(app_icon_lbl, 0, Qt.AlignmentFlag.AlignVCenter)
         hdr_row.addLayout(title_box, 1)
+        hdr_row.addWidget(self._lang_btn, 0, Qt.AlignmentFlag.AlignVCenter)
         hdr_row.addWidget(self._scale_cb, 0, Qt.AlignmentFlag.AlignVCenter)
         hdr_row.addWidget(self._palette_btn, 0, Qt.AlignmentFlag.AlignVCenter)
         hdr_row.addWidget(self._theme_btn, 0, Qt.AlignmentFlag.AlignVCenter)
@@ -504,7 +515,7 @@ class MainWindow(QMainWindow):
 
         # Style row
         st_row = QHBoxLayout()
-        self._st_lbl = QLabel("Style:")
+        self._st_lbl = QLabel(tr("Style:"))
         self._st_lbl.setFixedWidth(68)
         self._st_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:11px;")
         self.style_combo = QComboBox()
@@ -516,11 +527,11 @@ class MainWindow(QMainWindow):
 
         # HD + Custom row
         hd_row = QHBoxLayout()
-        self.hd_check = QCheckBox("HD tiles")
+        self.hd_check = QCheckBox(tr("HD tiles"))
         self.hd_check.setChecked(True)
         self.hd_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.hd_check.stateChanged.connect(self._reload_font)
-        self._custom_btn = QPushButton("+  Add Font")
+        self._custom_btn = QPushButton(tr("+  Add Font"))
         self._custom_btn.setStyleSheet(S.BTN_SEC)
         self._custom_btn.setFixedHeight(26)
         self._custom_btn.clicked.connect(self._custom_font)
@@ -532,16 +543,16 @@ class MainWindow(QMainWindow):
         # Download fonts from GitHub. Pulls the latest `fonts.zip` asset
         # attached to any recent release (release source itself ships slim
         # via .gitattributes export-ignore - see updater.py).
-        self._download_fonts_btn = QPushButton("↓  Download fonts from GitHub")
+        self._download_fonts_btn = QPushButton(tr("↓  Download fonts from GitHub"))
         self._download_fonts_btn.setStyleSheet(S.BTN_SEC)
         self._download_fonts_btn.setFixedHeight(26)
         self._download_fonts_btn.setToolTip(
-            "Fetch the bundled font pack (BTFL / INAV / ArduPilot) from the "
-            "project's GitHub releases and install it into the fonts/ folder.")
+            tr("Fetch the bundled font pack (BTFL / INAV / ArduPilot) from the "
+            "project's GitHub releases and install it into the fonts/ folder."))
         self._download_fonts_btn.clicked.connect(self._on_download_fonts)
         fontgl.addWidget(self._download_fonts_btn)
 
-        self.font_lbl = QLabel("No font loaded")
+        self.font_lbl = QLabel(tr("No font loaded"))
         self.font_lbl.setStyleSheet(f"color:{_T()['orange']};font-size:10px;")
         self.font_lbl.setWordWrap(True)
         fontgl.addWidget(self.font_lbl)
@@ -554,7 +565,7 @@ class MainWindow(QMainWindow):
         srtgl.setSpacing(4)
         srtgl.setContentsMargins(10, 16, 10, 10)
 
-        self.srt_bar_check = QCheckBox("Show link status bar")
+        self.srt_bar_check = QCheckBox(tr("Show link status bar"))
         self.srt_bar_check.setChecked(True)
         self.srt_bar_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.srt_bar_check.stateChanged.connect(self._refresh_preview)
@@ -565,15 +576,15 @@ class MainWindow(QMainWindow):
         self.srt_size_sl = LabeledSlider("Size", 50, 200, 100, "%")
         self.srt_size_sl.valueChanged.connect(self._refresh_preview)
 
-        _fields_lbl = QLabel("Visible fields:")
+        _fields_lbl = QLabel(tr("Visible fields:"))
         _fields_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:11px;")
         self.srt_fields_combo = CheckableComboBox()
         self.srt_fields_combo.add_items(SRT_FIELDS)
         self.srt_fields_combo.setStyleSheet("font-size:11px;")
         self.srt_fields_combo.selectionChanged.connect(lambda _: self._refresh_preview())
 
-        note2 = QLabel("Radio signal, bitrate, GPS, altitude from .srt.\n"
-                       "'No MAVLink telemetry' lines are hidden.")
+        note2 = QLabel(tr("Radio signal, bitrate, GPS, altitude from .srt.\n"
+                       "'No MAVLink telemetry' lines are hidden."))
         note2.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
         note2.setWordWrap(True)
 
@@ -609,14 +620,14 @@ class MainWindow(QMainWindow):
         # Unified edit/lock toggle — when unlocked, the canvas draws selection
         # chrome and captures mouse drags so ANY widget (custom widgets and the
         # GPS map alike) can be repositioned/resized directly on the preview.
-        self.widget_edit_btn = QPushButton("  Layout locked")
+        self.widget_edit_btn = QPushButton(tr("  Layout locked"))
         self.widget_edit_btn.setCheckable(True)
         self.widget_edit_btn.setStyleSheet(S.BTN_SEC)
         self.widget_edit_btn.setFixedHeight(26)
         self.widget_edit_btn.setIcon(_icon("lock.png", 16))
         self.widget_edit_btn.setToolTip(
-            "Unlock the layout to drag and resize widgets — including the GPS "
-            "map — directly on the video preview. Click again to lock.")
+            tr("Unlock the layout to drag and resize widgets — including the GPS "
+            "map — directly on the video preview. Click again to lock."))
         self.widget_edit_btn.toggled.connect(self._on_widget_edit_toggled)
         wgl.addWidget(self.widget_edit_btn)
 
@@ -634,11 +645,11 @@ class MainWindow(QMainWindow):
         # Add / remove buttons
         wbtn_row = QHBoxLayout()
         wbtn_row.setSpacing(4)
-        self.widget_add_btn = QPushButton("＋ Add")
+        self.widget_add_btn = QPushButton(tr("＋ Add"))
         self.widget_add_btn.setStyleSheet(S.BTN_SEC)
         self.widget_add_btn.setFixedHeight(26)
         self.widget_add_btn.clicked.connect(self._on_widget_add)
-        self.widget_remove_btn = QPushButton("− Remove")
+        self.widget_remove_btn = QPushButton(tr("− Remove"))
         self.widget_remove_btn.setStyleSheet(S.BTN_SEC)
         self.widget_remove_btn.setFixedHeight(26)
         self.widget_remove_btn.clicked.connect(self._on_widget_remove)
@@ -650,13 +661,13 @@ class MainWindow(QMainWindow):
         # and reports the anchor glyph IDs sitting next to them. Use it when an
         # OSD-sourced widget stays blank because the symbol table doesn't match
         # the firmware's font (e.g. Betaflight vs INAV voltage/throttle icons).
-        self.widget_diag_btn = QPushButton("🔍  Diagnose OSD glyphs")
+        self.widget_diag_btn = QPushButton(tr("🔍  Diagnose OSD glyphs"))
         self.widget_diag_btn.setStyleSheet(S.BTN_SEC)
         self.widget_diag_btn.setFixedHeight(26)
         self.widget_diag_btn.setToolTip(
-            "Scan the current OSD frame for digit runs and report the "
+            tr("Scan the current OSD frame for digit runs and report the "
             "icon glyph IDs adjacent to them. Use this when an OSD-sourced "
-            "widget shows nothing.")
+            "widget shows nothing."))
         self.widget_diag_btn.clicked.connect(self._on_widget_diagnose)
         wgl.addWidget(self.widget_diag_btn)
 
@@ -687,20 +698,20 @@ class MainWindow(QMainWindow):
 
         wp.addWidget(_lbl("Type"), row, 0)
         self.wp_type = QComboBox()
-        self.wp_type.addItem("Digital readout", "digital")
-        self.wp_type.addItem("Linear bar",       "bar")
-        self.wp_type.addItem("Circular gauge",   "gauge")
-        self.wp_type.addItem("Semicircle gauge", "semicircle")
-        self.wp_type.addItem("Tick dial",        "tickdial")
-        self.wp_type.addItem("Ring gauge",       "ring")
-        self.wp_type.addItem("Analog dial",      "analog")
+        self.wp_type.addItem(tr("Digital readout"), tr("digital"))
+        self.wp_type.addItem(tr("Linear bar"),       tr("bar"))
+        self.wp_type.addItem(tr("Circular gauge"),   tr("gauge"))
+        self.wp_type.addItem(tr("Semicircle gauge"), tr("semicircle"))
+        self.wp_type.addItem(tr("Tick dial"),        tr("tickdial"))
+        self.wp_type.addItem(tr("Ring gauge"),       tr("ring"))
+        self.wp_type.addItem(tr("Analog dial"),      tr("analog"))
         self.wp_type.currentIndexChanged.connect(self._on_widget_prop_changed)
         wp.addWidget(self.wp_type, row, 1, 1, 2)
         row += 1
 
         wp.addWidget(_lbl("Label"), row, 0)
         self.wp_label = QLineEdit()
-        self.wp_label.setPlaceholderText("(no label)")
+        self.wp_label.setPlaceholderText(tr("(no label)"))
         self.wp_label.editingFinished.connect(self._on_widget_prop_changed)
         wp.addWidget(self.wp_label, row, 1, 1, 2)
         row += 1
@@ -710,7 +721,7 @@ class MainWindow(QMainWindow):
         self.wp_color.setMaxLength(9)
         self.wp_color.editingFinished.connect(self._on_widget_prop_changed)
         wp.addWidget(self.wp_color, row, 1)
-        self.wp_color_btn = QPushButton("…")
+        self.wp_color_btn = QPushButton(tr("…"))
         self.wp_color_btn.setFixedWidth(28)
         self.wp_color_btn.setFixedHeight(22)
         self.wp_color_btn.setStyleSheet(S.BTN_SEC)
@@ -766,7 +777,7 @@ class MainWindow(QMainWindow):
         self.wp_smoothness.setRange(0, 300)
         self.wp_smoothness.setValue(70)
         self.wp_smoothness.setToolTip(
-            "Visual alpha-beta smoothing for bars and gauges. 0% disables smoothing completely; values above 300% can be typed for testing.")
+            tr("Visual alpha-beta smoothing for bars and gauges. 0% disables smoothing completely; values above 300% can be typed for testing."))
         self.wp_smoothness.valueChanged.connect(self._on_widget_prop_changed)
         wp.addWidget(self.wp_smoothness, row, 1)
         self.wp_smoothness_spin = QSpinBox()
@@ -785,8 +796,8 @@ class MainWindow(QMainWindow):
 
         wgl.addWidget(self._wprops)
 
-        wnote = QLabel("Widgets read live telemetry from the SRT track. "
-                       "Toggle edit mode then drag on the preview to reposition.")
+        wnote = QLabel(tr("Widgets read live telemetry from the SRT track. "
+                       "Toggle edit mode then drag on the preview to reposition."))
         wnote.setStyleSheet(f"color:{t['muted']};font-size:10px;")
         wnote.setWordWrap(True)
         wgl.addWidget(wnote)
@@ -819,13 +830,13 @@ class MainWindow(QMainWindow):
         # Positioning is handled by the unified "Edit layout" toggle in the
         # Custom Widgets box — the map is just a widget, so it's dragged and
         # resized on the canvas like any other.
-        self.map_show_btn = QPushButton("  Map hidden")
+        self.map_show_btn = QPushButton(tr("  Map hidden"))
         self.map_show_btn.setCheckable(True)
         self.map_show_btn.setStyleSheet(S.BTN_SEC)
         self.map_show_btn.setFixedHeight(28)
         self.map_show_btn.setIcon(_icon("eye-closed.png", 16))
         self.map_show_btn.setToolTip(
-            "Show or hide the GPS map overlay on the video.")
+            tr("Show or hide the GPS map overlay on the video."))
         self.map_show_btn.toggled.connect(self._on_map_show_toggled)
         mgl.addWidget(self.map_show_btn, mrow, 0, 1, 2)
         mrow += 1
@@ -836,25 +847,25 @@ class MainWindow(QMainWindow):
 
         mgl.addWidget(_lbl("Underlay"), mrow, 0)
         self.map_underlay = QComboBox()
-        self.map_underlay.addItem("None (track only)", "none")
-        self.map_underlay.addItem("Street map (OSM)",  "street")
-        self.map_underlay.addItem("Satellite (Esri)",  "satellite")
+        self.map_underlay.addItem(tr("None (track only)"), tr("none"))
+        self.map_underlay.addItem(tr("Street map (OSM)"),  tr("street"))
+        self.map_underlay.addItem(tr("Satellite (Esri)"),  tr("satellite"))
         self.map_underlay.setToolTip(
-            "Draw a map under the GPS track. Downloads map tiles on first use "
+            tr("Draw a map under the GPS track. Downloads map tiles on first use "
             "(cached for offline reuse); falls back to a plain background when "
-            "offline.")
+            "offline."))
         self.map_underlay.currentIndexChanged.connect(self._on_map_underlay_changed)
         mgl.addWidget(self.map_underlay, mrow, 1)
         mrow += 1
 
         mgl.addWidget(_lbl("Marker"), mrow, 0)
         self.map_marker = QComboBox()
-        self.map_marker.addItem("Dot",        "dot")
-        self.map_marker.addItem("Quadcopter", "quadcopter")
-        self.map_marker.addItem("Plane",      "plane")
+        self.map_marker.addItem(tr("Dot"),        tr("dot"))
+        self.map_marker.addItem(tr("Quadcopter"), tr("quadcopter"))
+        self.map_marker.addItem(tr("Plane"),      tr("plane"))
         self.map_marker.setToolTip(
-            "Shape drawn at the craft's current position. Plane rotates to "
-            "match heading.")
+            tr("Shape drawn at the craft's current position. Plane rotates to "
+            "match heading."))
         self.map_marker.currentIndexChanged.connect(self._on_map_marker_changed)
         mgl.addWidget(self.map_marker, mrow, 1)
         mrow += 1
@@ -881,9 +892,9 @@ class MainWindow(QMainWindow):
         mgl.addWidget(self.map_h, mrow, 1)
         mrow += 1
 
-        mnote = QLabel("Tiles download on first use and are cached offline; "
+        mnote = QLabel(tr("Tiles download on first use and are cached offline; "
                        "the map auto-zooms to the path. Reposition it with "
-                       "“Layout locked/unlocked” in Custom Widgets.")
+                       "“Layout locked/unlocked” in Custom Widgets."))
         mnote.setStyleSheet(f"color:{t['muted']};font-size:{_fs(10)}px;")
         mnote.setWordWrap(True)
         mgl.addWidget(mnote, mrow, 0, 1, 2)
@@ -903,7 +914,7 @@ class MainWindow(QMainWindow):
         cl.setContentsMargins(10, 16, 10, 12)
         cl.setSpacing(8)
 
-        self._prev_lbl = QLabel("Preview")
+        self._prev_lbl = QLabel(tr("Preview"))
         self._prev_lbl.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
         self._prev_lbl.setStyleSheet(f"color:{_T()['subtext']}")
         cl.addWidget(self._prev_lbl)
@@ -953,11 +964,11 @@ class MainWindow(QMainWindow):
 
         # ── Credits ───────────────────────────────────────────────────────────
         credit = QLabel(
-            'Icons by <a href="https://www.flaticon.com/free-icons/wifi-connection" '
+            tr('Icons by <a href="https://www.flaticon.com/free-icons/wifi-connection" '
             'style="color:#2a2a3a;text-decoration:none;">Smashicons \u2013 Flaticon</a>'
             '  &middot;  Color correction based on '
             '<a href="https://github.com/sickgreg/VfxEnc" '
-            'style="color:#2a2a3a;text-decoration:none;">VfxEnc</a> by sickgreg'
+            'style="color:#2a2a3a;text-decoration:none;">VfxEnc</a> by sickgreg')
         )
         credit.setStyleSheet(f"color:{_T()['muted']};font-size:8px;")
         credit.setOpenExternalLinks(True)
@@ -972,23 +983,23 @@ class MainWindow(QMainWindow):
         below.setSpacing(10)
 
         # Fine-tune position
-        posg = QGroupBox("Fine-tune Position & Scale")
+        posg = QGroupBox(tr("Fine-tune Position & Scale"))
         posg.setStyleSheet(S.GROUP_STYLE)
         posgl = QVBoxLayout(posg)
         posgl.setSpacing(4)
         posgl.setContentsMargins(10, 16, 10, 10)
 
-        pos_note = QLabel("OSD auto-fitted to video height, centred.")
+        pos_note = QLabel(tr("OSD auto-fitted to video height, centred."))
         pos_note.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
         posgl.addWidget(pos_note)
 
         # Master toggle for the MSP OSD glyph grid. Turn off to render widgets
         # alone (and still see the SRT bar if enabled).
-        self.osd_show_check = QCheckBox("Show OSD glyphs")
+        self.osd_show_check = QCheckBox(tr("Show OSD glyphs"))
         self.osd_show_check.setChecked(True)
         self.osd_show_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.osd_show_check.setToolTip(
-            "Hide the MSP OSD glyph grid. Widgets and the SRT bar are unaffected.")
+            tr("Hide the MSP OSD glyph grid. Widgets and the SRT bar are unaffected."))
         self.osd_show_check.stateChanged.connect(self._refresh_preview)
         posgl.addWidget(self.osd_show_check)
 
@@ -1002,7 +1013,7 @@ class MainWindow(QMainWindow):
         # OSD sync offset row
         sync_row = QHBoxLayout()
         sync_row.setSpacing(4)
-        self._sync_lbl = QLabel("OSD offset:")
+        self._sync_lbl = QLabel(tr("OSD offset:"))
         self._sync_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:{_fs(11)}px;")
         self._sync_lbl.setFixedWidth(72)
         self.osd_offset_sb = QSpinBox()
@@ -1013,12 +1024,12 @@ class MainWindow(QMainWindow):
         self.osd_offset_sb.setValue(_OSD_OFFSET_MS)
         self.osd_offset_sb.setSuffix(" ms")
         self.osd_offset_sb.setToolTip(
-            "Shift OSD timestamps relative to video.\n"
+            tr("Shift OSD timestamps relative to video.\n"
             "+500 ms → OSD shows data 500 ms later (compensates OSD lagging behind).\n"
             "−500 ms → OSD shows data 500 ms earlier.\n"
             "Onboard video + ground-recorded .osd/.srt: set this to how long the\n"
             "ground recording had been running when the onboard recording started\n"
-            "(often tens of seconds).")
+            "(often tens of seconds)."))
         self.osd_offset_sb.setStyleSheet(
             f"QSpinBox{{background:{_T()['surface']};color:{_T()['text']};"
             f"border:1px solid {_T()['border2']};border-radius:4px;padding:3px 6px;}}"
@@ -1026,31 +1037,31 @@ class MainWindow(QMainWindow):
             f"background:{_T()['surface2']};border-radius:2px;}}"
         )
         self.osd_offset_sb.valueChanged.connect(self._on_osd_offset_changed)
-        self._rst_offset_btn = QPushButton("↺")
+        self._rst_offset_btn = QPushButton(tr("↺"))
         self._rst_offset_btn.setFixedWidth(28)
         self._rst_offset_btn.setFixedHeight(24)
         self._rst_offset_btn.setStyleSheet(S.BTN_SEC)
-        self._rst_offset_btn.setToolTip("Reset OSD offset to 0")
+        self._rst_offset_btn.setToolTip(tr("Reset OSD offset to 0"))
         self._rst_offset_btn.clicked.connect(lambda: self.osd_offset_sb.setValue(0))
         sync_row.addWidget(self._sync_lbl)
         sync_row.addWidget(self.osd_offset_sb, 1)
         sync_row.addWidget(self._rst_offset_btn)
         posgl.addLayout(sync_row)
 
-        self._rst_pos_btn = QPushButton("↺  Reset")
+        self._rst_pos_btn = QPushButton(tr("↺  Reset"))
         self._rst_pos_btn.setStyleSheet(S.BTN_SEC)
         self._rst_pos_btn.setFixedHeight(26)
         self._rst_pos_btn.clicked.connect(self._reset_pos)
         posgl.addWidget(self._rst_pos_btn)
 
         # ── Hide OSD Regions ──────────────────────────────────────────────
-        hideg = QGroupBox("Hide OSD Regions")
+        hideg = QGroupBox(tr("Hide OSD Regions"))
         hideg.setStyleSheet(S.GROUP_STYLE)
         hidegl = QVBoxLayout(hideg)
         hidegl.setSpacing(4)
         hidegl.setContentsMargins(10, 16, 10, 10)
 
-        self.hide_enable_check = QCheckBox("Enable region masking")
+        self.hide_enable_check = QCheckBox(tr("Enable region masking"))
         self.hide_enable_check.setChecked(True)
         self.hide_enable_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.hide_enable_check.stateChanged.connect(self._on_hide_enable_toggled)
@@ -1058,17 +1069,17 @@ class MainWindow(QMainWindow):
 
         hide_btn_row = QHBoxLayout()
         hide_btn_row.setSpacing(4)
-        self.hide_add_btn = QPushButton("＋ Add")
+        self.hide_add_btn = QPushButton(tr("＋ Add"))
         self.hide_add_btn.setCheckable(True)
         self.hide_add_btn.setStyleSheet(S.BTN_SEC)
         self.hide_add_btn.setFixedHeight(26)
         self.hide_add_btn.toggled.connect(self._on_hide_add_toggled)
-        self.hide_remove_btn = QPushButton("− Remove")
+        self.hide_remove_btn = QPushButton(tr("− Remove"))
         self.hide_remove_btn.setCheckable(True)
         self.hide_remove_btn.setStyleSheet(S.BTN_SEC)
         self.hide_remove_btn.setFixedHeight(26)
         self.hide_remove_btn.toggled.connect(self._on_hide_remove_toggled)
-        self.hide_clear_btn = QPushButton("Clear")
+        self.hide_clear_btn = QPushButton(tr("Clear"))
         self.hide_clear_btn.setStyleSheet(S.BTN_SEC)
         self.hide_clear_btn.setFixedHeight(26)
         self.hide_clear_btn.clicked.connect(self._on_hide_clear)
@@ -1077,12 +1088,12 @@ class MainWindow(QMainWindow):
         hide_btn_row.addWidget(self.hide_clear_btn)
         hidegl.addLayout(hide_btn_row)
 
-        self.hide_count_lbl = QLabel("0 regions")
+        self.hide_count_lbl = QLabel(tr("0 regions"))
         self.hide_count_lbl.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
         hidegl.addWidget(self.hide_count_lbl)
 
-        hide_note = QLabel("Drag on the preview to blank OSD cells. "
-                           "Regions follow the OSD when you change scale or offset.")
+        hide_note = QLabel(tr("Drag on the preview to blank OSD cells. "
+                           "Regions follow the OSD when you change scale or offset."))
         hide_note.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
         hide_note.setWordWrap(True)
         hidegl.addWidget(hide_note)
@@ -1113,13 +1124,13 @@ class MainWindow(QMainWindow):
         """Build color correction collapsible group and add to layout."""
         t = _T()
 
-        self._cc_group = QGroupBox("Color Correction")
+        self._cc_group = QGroupBox(tr("Color Correction"))
         self._cc_group.setStyleSheet(S.GROUP_STYLE)
         ccl = QVBoxLayout(self._cc_group)
         ccl.setSpacing(2)
         ccl.setContentsMargins(10, 14, 10, 6)
 
-        self.cc_enable = QCheckBox("Enable color correction")
+        self.cc_enable = QCheckBox(tr("Enable color correction"))
         self.cc_enable.setStyleSheet(f"color:{t['text']};font-size:11px;")
         self.cc_enable.stateChanged.connect(self._on_color_changed)
         ccl.addWidget(self.cc_enable)
@@ -1167,7 +1178,7 @@ class MainWindow(QMainWindow):
         _slider("cc_sat",        "Satur.",    -100, 100, -22)
 
         # RGB multipliers — button opens popup dialog
-        self._cc_rgb_btn = QPushButton("R / G / B:  1.00 / 1.00 / 1.00")
+        self._cc_rgb_btn = QPushButton(tr("R / G / B:  1.00 / 1.00 / 1.00"))
         self._cc_rgb_btn.setStyleSheet(S.BTN_SEC)
         self._cc_rgb_btn.setFixedHeight(26)
         self._cc_rgb_btn.clicked.connect(self._cc_open_rgb_popup)
@@ -1196,20 +1207,20 @@ class MainWindow(QMainWindow):
         # Preset + Reset row
         preset_row = QHBoxLayout()
         preset_row.setSpacing(4)
-        self._cc_preset_lbl = QLabel("Preset:")
+        self._cc_preset_lbl = QLabel(tr("Preset:"))
         self._cc_preset_lbl.setStyleSheet(f"color:{t['subtext']};font-size:11px;")
         self._cc_preset_lbl.setFixedWidth(48)
         self.cc_preset_cb = QComboBox()
         self.cc_preset_cb.setStyleSheet(S.COMBO_STYLE)
         self.cc_preset_cb.currentIndexChanged.connect(self._on_cc_preset_changed)
-        self._cc_save_btn = QPushButton("Save…")
+        self._cc_save_btn = QPushButton(tr("Save…"))
         self._cc_save_btn.setStyleSheet(S.BTN_SEC)
         self._cc_save_btn.setFixedHeight(24)
         self._cc_save_btn.clicked.connect(self._cc_save_preset)
-        self._cc_rst_btn = QPushButton("Reset")
+        self._cc_rst_btn = QPushButton(tr("Reset"))
         self._cc_rst_btn.setStyleSheet(S.BTN_SEC)
         self._cc_rst_btn.setFixedHeight(24)
-        self._cc_rst_btn.setToolTip("Reset all color correction to defaults")
+        self._cc_rst_btn.setToolTip(tr("Reset all color correction to defaults"))
         self._cc_rst_btn.clicked.connect(self._cc_reset_defaults)
         preset_row.addWidget(self._cc_preset_lbl)
         preset_row.addWidget(self.cc_preset_cb, 1)
@@ -1255,7 +1266,7 @@ class MainWindow(QMainWindow):
         self._build_color_correction_group(rl)
 
         # ── Output & Encoding (merged) ───────────────────────────────────────
-        encg = QGroupBox("Output & Encoding")
+        encg = QGroupBox(tr("Output & Encoding"))
         encg.setStyleSheet(S.GROUP_STYLE)
         encgl = QVBoxLayout(encg)
         encgl.setSpacing(4)
@@ -1269,7 +1280,7 @@ class MainWindow(QMainWindow):
 
         # Codec row
         codec_row = QHBoxLayout()
-        self._codec_lbl = QLabel("Codec:")
+        self._codec_lbl = QLabel(tr("Codec:"))
         self._codec_lbl.setFixedWidth(52)
         self._codec_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:11px;")
         self.codec_cb = QComboBox()
@@ -1285,16 +1296,16 @@ class MainWindow(QMainWindow):
         mbps_lay = QHBoxLayout(self.mbps_row)
         mbps_lay.setContentsMargins(0, 0, 0, 0)
         mbps_lay.setSpacing(6)
-        self._mbps_lbl = QLabel("Mbit/s:")
+        self._mbps_lbl = QLabel(tr("Mbit/s:"))
         self._mbps_lbl.setFixedWidth(52)
         self._mbps_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:11px;")
         self.mbps_sl = QSlider(Qt.Orientation.Horizontal)
         self.mbps_sl.setRange(0, 1000)
         self.mbps_sl.setValue(self._mbps_to_slider(8))
         self.mbps_sl.setToolTip(
-            "Drag to set output bitrate (logarithmic scale, 1–100 Mbit/s).\n"
+            tr("Drag to set output bitrate (logarithmic scale, 1–100 Mbit/s).\n"
             "Use the arrows on the right for ±1 Mbit/s fine steps.\n"
-            "Auto-set to source average bitrate on video load."
+            "Auto-set to source average bitrate on video load.")
         )
         self.mbps_sl.setStyleSheet(S.SLIDER_STYLE)
         self.mbps_spin = QSpinBox()
@@ -1323,12 +1334,12 @@ class MainWindow(QMainWindow):
         # GPU row — checkbox + status on same line
         gpu_row = QHBoxLayout()
         gpu_row.setSpacing(6)
-        self.hw_check = QCheckBox("⚡ GPU")
+        self.hw_check = QCheckBox(tr("⚡ GPU"))
         self.hw_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.hw_check.setEnabled(False)
         self.hw_check.setChecked(False)
         self.hw_check.stateChanged.connect(self._update_size_hint)
-        self.hw_lbl = QLabel("Detecting…")
+        self.hw_lbl = QLabel(tr("Detecting…"))
         self.hw_lbl.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
         gpu_row.addWidget(self.hw_check)
         gpu_row.addWidget(self.hw_lbl, 1)
@@ -1361,9 +1372,9 @@ class MainWindow(QMainWindow):
                 self.hw_lbl.setStyleSheet(f"color:{_T()['green']};font-size:10px;")
                 self.hw_check.setToolTip(f"✓ {_hw['name']} ({_hw['h264']})")
             else:
-                self.hw_lbl.setText("No GPU encoder found")
+                self.hw_lbl.setText(tr("No GPU encoder found"))
                 self.hw_lbl.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
-                self.hw_check.setToolTip("No GPU encoder found (NVENC/AMF/QSV/VAAPI)")
+                self.hw_check.setToolTip(tr("No GPU encoder found (NVENC/AMF/QSV/VAAPI)"))
             self._update_size_hint()
 
         _poll_timer = QTimer(self)
@@ -1372,14 +1383,14 @@ class MainWindow(QMainWindow):
         _poll_timer.start()
 
         upscale_row = QHBoxLayout()
-        self._upscale_lbl = QLabel("Upscale output:")
+        self._upscale_lbl = QLabel(tr("Upscale output:"))
         self._upscale_lbl.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.upscale_combo = QComboBox()
         self.upscale_combo.addItems(["Off", "1440p  (2560×1440)", "2.7K  (2688×1512)", "4K  (3840×2160)"])
         self.upscale_combo.setStyleSheet(S.COMBO_STYLE)
         self.upscale_combo.setToolTip(
-            "Scale the output video to a higher resolution using Lanczos.\n"
-            "Useful when source is 1080p and you want a sharper result on a high-res display."
+            tr("Scale the output video to a higher resolution using Lanczos.\n"
+            "Useful when source is 1080p and you want a sharper result on a high-res display.")
         )
         upscale_row.addWidget(self._upscale_lbl)
         upscale_row.addWidget(self.upscale_combo, 1)
@@ -1387,15 +1398,15 @@ class MainWindow(QMainWindow):
 
         # Aspect-ratio (letter/pillarbox) selector
         aspect_row = QHBoxLayout()
-        self._aspect_lbl = QLabel("Aspect ratio:")
+        self._aspect_lbl = QLabel(tr("Aspect ratio:"))
         self._aspect_lbl.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.aspect_combo = QComboBox()
         self.aspect_combo.addItems(["Source", "16:9", "4:3", "21:9", "1:1", "9:16"])
         self.aspect_combo.setStyleSheet(S.COMBO_STYLE)
         self.aspect_combo.setToolTip(
-            "Pad the video into a wider or taller canvas with black bars.\n"
+            tr("Pad the video into a wider or taller canvas with black bars.\n"
             "Use this to put a 4:3 source into a 16:9 frame and place OSD\n"
-            "elements inside the side bars (drag them out with the X offset)."
+            "elements inside the side bars (drag them out with the X offset).")
         )
         self.aspect_combo.currentIndexChanged.connect(self._on_aspect_changed)
         aspect_row.addWidget(self._aspect_lbl)
@@ -1405,15 +1416,15 @@ class MainWindow(QMainWindow):
         encgl.addWidget(_sep())
 
         # Chroma key export (OSD on solid magenta background, H.264 .mp4)
-        self.transparent_check = QCheckBox("Chroma key export (magenta)")
+        self.transparent_check = QCheckBox(tr("Chroma key export (magenta)"))
         self.transparent_check.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.transparent_check.setToolTip(
-            "Export only the OSD glyphs and SRT bar onto a solid magenta\n"
+            tr("Export only the OSD glyphs and SRT bar onto a solid magenta\n"
             "background as a standard H.264 .mp4. Pull the magenta key in\n"
             "DaVinci Resolve, Premiere Pro, or Final Cut Pro to layer the\n"
             "OSD onto GoPro/action-cam footage.\n\n"
             "Magenta is used because no FPV OSD glyphs ever contain it,\n"
-            "so the keyer can't eat any OSD content."
+            "so the keyer can't eat any OSD content.")
         )
         self.transparent_check.stateChanged.connect(self._on_transparent_changed)
         encgl.addWidget(self.transparent_check)
@@ -1433,13 +1444,13 @@ class MainWindow(QMainWindow):
         self.prog = RenderBar()
         bl.addWidget(self.prog)
 
-        self.status = QLabel("Ready")
+        self.status = QLabel(tr("Ready"))
         self.status.setStyleSheet(f"color:{_T()['muted']};font-size:10px;")
         self.status.setWordWrap(True)
         bl.addWidget(self.status)
 
         # OSD trimmed warning (hidden by default)
-        self.osd_warn = QLabel("⚠ No OSD elements in trim window — rendering without OSD overlay")
+        self.osd_warn = QLabel(tr("⚠ No OSD elements in trim window — rendering without OSD overlay"))
         self.osd_warn.setStyleSheet(f"color:{_T()['orange']};font-size:10px;")
         self.osd_warn.setWordWrap(True)
         self.osd_warn.setVisible(False)
@@ -1449,7 +1460,7 @@ class MainWindow(QMainWindow):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(6)
 
-        self.render_btn = QPushButton("  Render Video")
+        self.render_btn = QPushButton(tr("  Render Video"))
         self.render_btn.setIcon(_icon("render.png", 18))
         self.render_btn.setFixedHeight(36)
         self.render_btn.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
@@ -1460,7 +1471,7 @@ class MainWindow(QMainWindow):
         self.stop_btn.setIcon(_icon("stop.png", 18))
         self.stop_btn.setFixedSize(36, 36)
         self.stop_btn.setStyleSheet(S.BTN_STOP)
-        self.stop_btn.setToolTip("Stop render")
+        self.stop_btn.setToolTip(tr("Stop render"))
         self.stop_btn.clicked.connect(self._stop_render)
         self.stop_btn.setEnabled(False)
 
@@ -1727,6 +1738,14 @@ class MainWindow(QMainWindow):
         S.set_dark_theme(not S.is_dark())
         self._refresh_theme()
 
+    def _toggle_language(self):
+        """Switch UI language in place and remember the choice."""
+        nxt = 'zh' if i18n.get_language() == 'en' else 'en'
+        i18n.set_language(nxt)
+        i18n.apply_language()
+        self.setWindowTitle(f"VueOSD v{VERSION} — " + tr("Digital FPV OSD Tool"))
+        self._lang_btn.setText(i18n.toggle_label())
+
     def _open_theme_editor(self):
         """Open (or raise) the palette editor dialog."""
         from theme_editor import ThemeEditor
@@ -1934,7 +1953,7 @@ class MainWindow(QMainWindow):
         if not self.out_row.path:
             self.out_row.set_path(self._make_output_path(path))
         self.video_frame = None
-        self._st("Reading video info\u2026")
+        self._st(tr("Reading video info\u2026"))
         self._load_project_state(path)
         self._vi = VideoInfoWorker(path)
         self._vi.result.connect(self._got_vid_info)
@@ -2010,7 +2029,7 @@ class MainWindow(QMainWindow):
                 info.get("width", 0), info.get("height", 0))
             # Apply aspect padding spec now that source dims are known
             self._apply_aspect_to_canvas()
-        self._st("Ready")
+        self._st(tr("Ready"))
 
     ## _start_prefetch, _prefetch_frames — removed (now in PlayerController)
 
@@ -2046,14 +2065,14 @@ class MainWindow(QMainWindow):
         try:
             if not detect_p1(video_path):
                 return
-            self._st("Detected BetaFPV P1 — extracting embedded OSD…")
+            self._st(tr("Detected BetaFPV P1 — extracting embedded OSD…"))
             p1_data = parse_p1_osd(video_path)
             if not p1_data or not p1_data.frames:
-                self._st("P1 OSD: no frames found")
+                self._st(tr("P1 OSD: no frames found"))
                 return
             # Remap P1 timestamps from frame_num/fps to actual video PTS
             # (fixes OSD timer running too fast when frames are dropped)
-            pts = get_frame_pts(video_path)
+            pts = None if p1_data.pts_are_final else get_frame_pts(video_path)
             if pts:
                 for fr in p1_data.frames:
                     idx = fr.frame_index
@@ -2634,18 +2653,18 @@ class MainWindow(QMainWindow):
         """Run the OSD glyph diagnostic on the current frame, show the report."""
         from osd_decoder import find_anchor_candidates, debug_anchors
         if not self.osd_data:
-            QMessageBox.information(self, "OSD diagnostic",
-                "Load an .osd file first — the diagnostic reads the current "
-                "OSD frame.")
+            QMessageBox.information(self, tr("OSD diagnostic"),
+                tr("Load an .osd file first — the diagnostic reads the current "
+                "OSD frame."))
             return
         ctrl = self._player_panel.controller
         pct  = int(self._player_panel.timeline._position * _SL_MAX)
         t_ms = ctrl.pct_to_video_time_ms(pct) + self.osd_offset_sb.value()
         osd_frame = self.osd_data.frame_at_time(t_ms)
         if osd_frame is None:
-            QMessageBox.information(self, "OSD diagnostic",
-                "No OSD frame at the current playhead. Scrub to a moment "
-                "where the OSD is visible and try again.")
+            QMessageBox.information(self, tr("OSD diagnostic"),
+                tr("No OSD frame at the current playhead. Scrub to a moment "
+                "where the OSD is visible and try again."))
             return
 
         cands = find_anchor_candidates(osd_frame)
@@ -2683,11 +2702,11 @@ class MainWindow(QMainWindow):
         report = "\n".join(lines)
 
         dlg = QDialog(self)
-        dlg.setWindowTitle("OSD glyph diagnostic")
+        dlg.setWindowTitle(tr("OSD glyph diagnostic"))
         dlg.resize(620, 480)
         vl = QVBoxLayout(dlg)
-        intro = QLabel("Copy this report and share it so the firmware symbol "
-                       "table can be corrected:")
+        intro = QLabel(tr("Copy this report and share it so the firmware symbol "
+                       "table can be corrected:"))
         intro.setWordWrap(True)
         vl.addWidget(intro)
         from PyQt6.QtWidgets import QPlainTextEdit
@@ -2700,10 +2719,10 @@ class MainWindow(QMainWindow):
         txt.setFont(mono)
         vl.addWidget(txt)
         btn_row = QHBoxLayout()
-        copy_btn = QPushButton("Copy to clipboard")
+        copy_btn = QPushButton(tr("Copy to clipboard"))
         copy_btn.setStyleSheet(S.BTN_SEC)
         copy_btn.clicked.connect(lambda: QApplication.clipboard().setText(report))
-        close_btn = QPushButton("Close")
+        close_btn = QPushButton(tr("Close"))
         close_btn.setStyleSheet(S.BTN_PRIMARY)
         close_btn.clicked.connect(dlg.accept)
         btn_row.addStretch()
@@ -2914,14 +2933,14 @@ class MainWindow(QMainWindow):
         """Open a small dialog with R/G/B sliders."""
         t = _T()
         dlg = QDialog(self)
-        dlg.setWindowTitle("RGB Multipliers")
+        dlg.setWindowTitle(tr("RGB Multipliers"))
         dlg.setMinimumWidth(320)
         dlg.setStyleSheet(f"background:{t['bg']};")
         vl = QVBoxLayout(dlg)
         vl.setSpacing(8)
         vl.setContentsMargins(16, 16, 16, 12)
 
-        note = QLabel("Adjust per-channel gain (1.0 = neutral)")
+        note = QLabel(tr("Adjust per-channel gain (1.0 = neutral)"))
         note.setStyleSheet(f"color:{t['muted']};font-size:10px;")
         vl.addWidget(note)
 
@@ -2952,10 +2971,10 @@ class MainWindow(QMainWindow):
         b_sl.valueChanged.connect(lambda _: _apply())
 
         btn_row = QHBoxLayout()
-        rst_btn = QPushButton("Reset (1.0)")
+        rst_btn = QPushButton(tr("Reset (1.0)"))
         rst_btn.setStyleSheet(S.BTN_SEC)
         rst_btn.clicked.connect(lambda: (r_sl.setValue(100), g_sl.setValue(100), b_sl.setValue(100)))
-        ok_btn = QPushButton("Close")
+        ok_btn = QPushButton(tr("Close"))
         ok_btn.setStyleSheet(S.BTN_PRIMARY)
         ok_btn.setFixedHeight(28)
         ok_btn.clicked.connect(dlg.accept)
@@ -2997,7 +3016,7 @@ class MainWindow(QMainWindow):
             idx = self.cc_preset_cb.findText("Custom")
             if idx < 0:
                 self.cc_preset_cb.blockSignals(True)
-                self.cc_preset_cb.addItem("Custom")
+                self.cc_preset_cb.addItem(tr("Custom"))
                 self.cc_preset_cb.setCurrentText("Custom")
                 self.cc_preset_cb.blockSignals(False)
             else:
@@ -3035,8 +3054,8 @@ class MainWindow(QMainWindow):
             ffmpeg = find_ffmpeg()
             if ffmpeg and not detect_libplacebo(ffmpeg):
                 self._cc_glsl_warn.setText(
-                    "Your FFmpeg lacks libplacebo — GLSL shader will be skipped.\n"
-                    "Built-in LUT correction still works.")
+                    tr("Your FFmpeg lacks libplacebo — GLSL shader will be skipped.\n"
+                    "Built-in LUT correction still works."))
                 self._cc_glsl_warn.setVisible(True)
             else:
                 self._cc_glsl_warn.setVisible(False)
@@ -3290,34 +3309,34 @@ class MainWindow(QMainWindow):
     def _refresh_ffmpeg_status(self):
         ffp = find_ffmpeg()
         if ffp:
-            self.ffmpeg_lbl.setText("✓ FFmpeg found")
+            self.ffmpeg_lbl.setText(tr("✓ FFmpeg found"))
             self.ffmpeg_lbl.setStyleSheet(f"color:{_T()['green']};font-size:10px;")
             self.ffmpeg_lbl.setToolTip(ffp)
             if hasattr(self, "ffmpeg_install_btn"):
                 self.ffmpeg_install_btn.setVisible(False)
         else:
-            self.ffmpeg_lbl.setText("⚠ FFmpeg not found")
+            self.ffmpeg_lbl.setText(tr("⚠ FFmpeg not found"))
             self.ffmpeg_lbl.setStyleSheet(f"color:{_T()['red']};font-size:10px;")
             self.ffmpeg_lbl.setToolTip("")
 
     def _install_ffmpeg(self):
         import platform
         if platform.system() != "Windows":
-            QMessageBox.information(self, "Install FFmpeg",
-                "Install FFmpeg with your package manager:\n\n"
+            QMessageBox.information(self, tr("Install FFmpeg"),
+                tr("Install FFmpeg with your package manager:\n\n"
                 "  Ubuntu/Debian:  sudo apt install ffmpeg\n"
                 "  Fedora:         sudo dnf install ffmpeg\n"
                 "  Arch:           sudo pacman -S ffmpeg\n"
                 "  macOS:          brew install ffmpeg\n\n"
-                "Then restart the app.")
+                "Then restart the app."))
             return
         reply = QMessageBox.question(
-            self, "Install FFmpeg",
-            "This will install FFmpeg via winget.\nContinue?",
+            self, tr("Install FFmpeg"),
+            tr("This will install FFmpeg via winget.\nContinue?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
-        self._st("Installing FFmpeg via winget\u2026")
+        self._st(tr("Installing FFmpeg via winget\u2026"))
         self.ffmpeg_install_btn.setEnabled(False)
         def _do_install():
             try:
@@ -3348,12 +3367,12 @@ class MainWindow(QMainWindow):
                         pass
                     self._refresh_ffmpeg_status()
                     if find_ffmpeg():
-                        self._st("✓ FFmpeg installed successfully")
+                        self._st(tr("✓ FFmpeg installed successfully"))
                     else:
-                        self._st("FFmpeg installed — restart app to detect it")
+                        self._st(tr("FFmpeg installed — restart app to detect it"))
                 else:
-                    self._st("FFmpeg install failed")
-                    QMessageBox.critical(self, "Install Failed",
+                    self._st(tr("FFmpeg install failed"))
+                    QMessageBox.critical(self, tr("Install Failed"),
                         "Could not install FFmpeg automatically.\n\n"
                         + err_msg
                         + "\n\nDownload manually:\nhttps://www.gyan.dev/ffmpeg/builds/")
@@ -3362,13 +3381,13 @@ class MainWindow(QMainWindow):
 
     def _render(self):
         if not self.video_row.path:
-            QMessageBox.warning(self, "Missing", "Select a video file."); return
+            QMessageBox.warning(self, tr("Missing"), tr("Select a video file.")); return
         if not self.out_row.path:
-            QMessageBox.warning(self, "Missing", "Choose output location."); return
+            QMessageBox.warning(self, tr("Missing"), tr("Choose output location.")); return
         if not find_ffmpeg():
-            QMessageBox.critical(self, "FFmpeg Missing",
-                "FFmpeg not found.\n\nRun 'VueOSD.bat' to install it automatically,\n"
-                "or install manually from https://www.gyan.dev/ffmpeg/builds/")
+            QMessageBox.critical(self, tr("FFmpeg Missing"),
+                tr("FFmpeg not found.\n\nRun 'VueOSD.bat' to install it automatically,\n"
+                "or install manually from https://www.gyan.dev/ffmpeg/builds/"))
             return
 
         codec_map = {"H.264 (libx264)": "libx264", "H.265 (libx265)": "libx265"}
@@ -3396,7 +3415,7 @@ class MainWindow(QMainWindow):
         out_path = self.out_row.path
         if out_path and os.path.exists(out_path):
             dlg = QDialog(self)
-            dlg.setWindowTitle("File Already Exists")
+            dlg.setWindowTitle(tr("File Already Exists"))
             dlg.setMinimumWidth(420)
             vl = QVBoxLayout(dlg)
             vl.setSpacing(10)
@@ -3408,7 +3427,7 @@ class MainWindow(QMainWindow):
             warn_lbl.setStyleSheet(f"color:{_T()['text']};font-size:12px;")
             vl.addWidget(warn_lbl)
 
-            name_lbl = QLabel("Save as:")
+            name_lbl = QLabel(tr("Save as:"))
             name_lbl.setStyleSheet(f"color:{_T()['subtext']};font-size:11px;")
             vl.addWidget(name_lbl)
 
@@ -3422,13 +3441,13 @@ class MainWindow(QMainWindow):
 
             btn_row2 = QHBoxLayout()
             btn_row2.setSpacing(6)
-            overwrite_btn = QPushButton("Overwrite")
+            overwrite_btn = QPushButton(tr("Overwrite"))
             overwrite_btn.setStyleSheet(S.BTN_DANGER)
             overwrite_btn.setFixedHeight(32)
-            save_as_btn = QPushButton("Save with this name")
+            save_as_btn = QPushButton(tr("Save with this name"))
             save_as_btn.setStyleSheet(S.BTN_PRIMARY)
             save_as_btn.setFixedHeight(32)
-            cancel_btn2 = QPushButton("Cancel")
+            cancel_btn2 = QPushButton(tr("Cancel"))
             cancel_btn2.setStyleSheet(S.BTN_SEC)
             cancel_btn2.setFixedHeight(32)
             btn_row2.addWidget(cancel_btn2)
@@ -3451,7 +3470,7 @@ class MainWindow(QMainWindow):
                         f"background:{_T()['bg2']};color:{_T()['red']};"
                         f"border:1px solid {_T()['red']};border-radius:4px;padding:4px 8px;"
                     )
-                    name_lbl.setText("Save as:  ⚠ that file also exists — pick a different name")
+                    name_lbl.setText(tr("Save as:  ⚠ that file also exists — pick a different name"))
                     return
                 _result[0] = new_path
                 dlg.accept()
@@ -3532,7 +3551,7 @@ class MainWindow(QMainWindow):
     def _stop_render(self):
         if self.worker and self.worker.isRunning():
             self.worker.stop()
-            self._st("⏹ Stopped")
+            self._st(tr("⏹ Stopped"))
             self.prog.setActive(False)
             self.render_btn.setEnabled(True)
             self.stop_btn.setEnabled(False)
@@ -3552,7 +3571,7 @@ class MainWindow(QMainWindow):
                 self.osd_warn.setVisible(True)
 
             dlg = QMessageBox(self)
-            dlg.setWindowTitle("Done!")
+            dlg.setWindowTitle(tr("Done!"))
             dlg.setText(f"Saved to:\n{out_path}")
             dlg.setIcon(QMessageBox.Icon.Information)
             open_btn = dlg.addButton("  Open Folder", QMessageBox.ButtonRole.ActionRole)
@@ -3563,7 +3582,7 @@ class MainWindow(QMainWindow):
         else:
             self.prog.setActive(False)
             self._st(f"✗ {msg}")
-            QMessageBox.critical(self, "Error", f"Render failed:\n{msg}")
+            QMessageBox.critical(self, tr("Error"), f"Render failed:\n{msg}")
 
     def _open_folder(self, folder):
         if sys.platform == "win32":
@@ -3613,7 +3632,7 @@ class MainWindow(QMainWindow):
         is_git = updater.install_dir_is_git_checkout(install_dir)
 
         dlg = QDialog(self)
-        dlg.setWindowTitle("VueOSD update available")
+        dlg.setWindowTitle(tr("VueOSD update available"))
         dlg.resize(560, 480)
         vl = QVBoxLayout(dlg)
 
@@ -3628,9 +3647,9 @@ class MainWindow(QMainWindow):
 
         if is_git:
             warn = QLabel(
-                "⚠ This install is a git working copy. Updating will "
+                tr("⚠ This install is a git working copy. Updating will "
                 "overwrite tracked files, which will show up in <code>git "
-                "status</code>. Commit or stash first if that matters."
+                "status</code>. Commit or stash first if that matters.")
             )
             warn.setTextFormat(Qt.TextFormat.RichText)
             warn.setWordWrap(True)
@@ -3640,7 +3659,7 @@ class MainWindow(QMainWindow):
             )
             vl.addWidget(warn)
 
-        notes_lbl = QLabel("Release notes:")
+        notes_lbl = QLabel(tr("Release notes:"))
         vl.addWidget(notes_lbl)
         from PyQt6.QtWidgets import QTextBrowser
         notes = QTextBrowser()
@@ -3652,13 +3671,13 @@ class MainWindow(QMainWindow):
         vl.addWidget(notes, 1)
 
         btn_row = QHBoxLayout()
-        later_btn = QPushButton("Remind me later")
+        later_btn = QPushButton(tr("Remind me later"))
         later_btn.setStyleSheet(S.BTN_SEC)
-        later_btn.setToolTip("Ask again next launch.")
+        later_btn.setToolTip(tr("Ask again next launch."))
         skip_btn = QPushButton(f"Skip {info.tag}")
         skip_btn.setStyleSheet(S.BTN_SEC)
-        skip_btn.setToolTip("Don't ask about this version again.")
-        update_btn = QPushButton("Update now")
+        skip_btn.setToolTip(tr("Don't ask about this version again."))
+        update_btn = QPushButton(tr("Update now"))
         update_btn.setStyleSheet(S.BTN_PRIMARY)
         update_btn.setDefault(True)
         btn_row.addStretch()
@@ -3686,12 +3705,12 @@ class MainWindow(QMainWindow):
         install_dir = os.path.dirname(os.path.abspath(__file__))
 
         dlg = QDialog(self)
-        dlg.setWindowTitle("Downloading fonts")
+        dlg.setWindowTitle(tr("Downloading fonts"))
         dlg.resize(380, 110)
         dlg.setModal(True)
         dlg.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
         vl = QVBoxLayout(dlg)
-        status_lbl = QLabel("Starting…")
+        status_lbl = QLabel(tr("Starting…"))
         status_lbl.setWordWrap(True)
         vl.addWidget(status_lbl)
         prog = QProgressBar()
@@ -3707,7 +3726,7 @@ class MainWindow(QMainWindow):
         def on_done(err, n_fonts):
             dlg.accept()
             if err:
-                QMessageBox.critical(self, "Font download failed", err)
+                QMessageBox.critical(self, tr("Font download failed"), err)
                 return
             # Refresh the font picker so newly installed fonts show up.
             try:
@@ -3716,7 +3735,7 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
             QMessageBox.information(
-                self, "Fonts installed",
+                self, tr("Fonts installed"),
                 f"{n_fonts} fonts are now available in the Style picker.")
 
         worker.progress.connect(on_progress)
@@ -3734,13 +3753,13 @@ class MainWindow(QMainWindow):
         prog.setValue(0)
 
         dlg = QDialog(self)
-        dlg.setWindowTitle("Updating VueOSD")
+        dlg.setWindowTitle(tr("Updating VueOSD"))
         dlg.resize(380, 110)
         dlg.setModal(True)
         # Don't let the user dismiss mid-install via the close button.
         dlg.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
         vl = QVBoxLayout(dlg)
-        status_lbl = QLabel("Starting…")
+        status_lbl = QLabel(tr("Starting…"))
         status_lbl.setWordWrap(True)
         vl.addWidget(status_lbl)
         vl.addWidget(prog)
@@ -3754,7 +3773,7 @@ class MainWindow(QMainWindow):
         def on_done(err):
             dlg.accept()
             if err:
-                QMessageBox.critical(self, "Update failed", err)
+                QMessageBox.critical(self, tr("Update failed"), err)
                 return
             # Persist any pending state before restart.
             try:
@@ -3763,7 +3782,7 @@ class MainWindow(QMainWindow):
                 pass
             box = QMessageBox(self)
             box.setIcon(QMessageBox.Icon.Information)
-            box.setWindowTitle("Update installed")
+            box.setWindowTitle(tr("Update installed"))
             box.setText(
                 f"VueOSD {info.tag} installed.\n\n"
                 "Restart now to load the new version?"
@@ -3790,6 +3809,7 @@ class MainWindow(QMainWindow):
 
 
 def main():
+    i18n.load_language()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     app.setApplicationName("VueOSD")
@@ -3805,12 +3825,12 @@ def main():
         splash.set_progress(v, msg)
         app.processEvents()
 
-    step(0.15, "Loading OSD parser…")
-    step(0.30, "Loading font engine…")
-    step(0.48, "Loading video pipeline…")
-    step(0.64, "Building interface…")
+    step(0.15, tr("Loading OSD parser…"))
+    step(0.30, tr("Loading font engine…"))
+    step(0.48, tr("Loading video pipeline…"))
+    step(0.64, tr("Building interface…"))
     win = MainWindow()
-    step(0.92, "Checking FFmpeg…")
+    step(0.92, tr("Checking FFmpeg…"))
     app.processEvents()
 
     splash.finish(win)

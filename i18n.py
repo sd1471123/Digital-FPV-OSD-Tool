@@ -292,6 +292,13 @@ ZH = {
     '②  Pick a font style in the left panel': '②  在左侧面板选择字体样式',
     '③  Adjust position, opacity and scale; configure the SRT bar': '③  调整位置、不透明度和缩放；配置 SRT 信息栏',
     '④  Set the output file path, then click  Render': '④  设置输出文件路径，然后点击「渲染视频」',
+    '  Map shown': '  地图已显示',
+    'Hide map': '隐藏地图',
+    'Map hidden': '地图已隐藏',
+    'Map shown': '地图已显示',
+    'SIZE & POSITION': '大小与位置',
+    'Show map': '显示地图',
+    'Smoothness': '平滑度',
 }
 
 

@@ -772,7 +772,7 @@ class MainWindow(QMainWindow):
         wp.addWidget(self.wp_h, row, 1, 1, 2)
         row += 1
 
-        wp.addWidget(_lbl("Smoothness"), row, 0)
+        wp.addWidget(_lbl(tr("Smoothness")), row, 0)
         self.wp_smoothness = QSlider(Qt.Orientation.Horizontal)
         self.wp_smoothness.setRange(0, 300)
         self.wp_smoothness.setValue(70)
@@ -871,7 +871,7 @@ class MainWindow(QMainWindow):
         mrow += 1
 
         # ── Size & position ─────────────────────────────────────────────
-        mgl.addWidget(_section("SIZE & POSITION"), mrow, 0, 1, 2)
+        mgl.addWidget(_section(tr("SIZE & POSITION")), mrow, 0, 1, 2)
         mrow += 1
 
         # Size sliders run the full 5–100%: at 100% the map matches the video
@@ -2589,7 +2589,7 @@ class MainWindow(QMainWindow):
             ctrl.blockSignals(True)
         shown = mw is not None
         self.map_show_btn.setChecked(shown)
-        self.map_show_btn.setText("  Map shown" if shown else "  Map hidden")
+        self.map_show_btn.setText(tr("  Map shown") if shown else tr("  Map hidden"))
         self.map_show_btn.setIcon(_icon("eye.png" if shown else "eye-closed.png", 16))
         if mw is not None:
             ui = self.map_underlay.findData(str(mw.style.get("map_underlay", "none")))
@@ -2614,7 +2614,7 @@ class MainWindow(QMainWindow):
                 style={"color": "#FFFFFF", "map_underlay": underlay}))
         elif not checked and mw is not None:
             self._widgets.remove(mw)
-        self.map_show_btn.setText("  Map shown" if checked else "  Map hidden")
+        self.map_show_btn.setText(tr("  Map shown") if checked else tr("  Map hidden"))
         self.map_show_btn.setIcon(_icon("eye.png" if checked else "eye-closed.png", 16))
         self._refresh_widget_list()
         self._save_widget_settings()

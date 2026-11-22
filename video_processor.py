@@ -268,6 +268,38 @@ class ProcessingConfig:
     show_osd_grid: bool = True        # When False, MSP glyph grid is suppressed
                                       # (widgets + SRT bar still render).
     firmware:     str  = "INAV"       # FC type for OSD glyph decoding
+    cancel_event: object = None       # threading.Event; set to cancel the render cooperatively
+
+
+def _is_cancelled(config) -> bool:
+    """True when the UI has requested a cooperative stop of the active render."""
+    ev = getattr(config, "cancel_event", None)
+    return ev is not None and ev.is_set()
+
+
+class _Cancelled:
+    """Sentinel: render stopped by the user — neither success nor failure."""
+    def __bool__(self):
+        return False
+
+
+CANCELLED = _Cancelled()
+
+
+def _terminate_proc(proc):
+    """Terminate a child process and reap it, tolerating already-exited procs."""
+    if proc is None:
+        return
+    try:
+        if proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=3)
+            except Exception:
+                proc.kill()
+                proc.wait(timeout=3)
+    except Exception:
+        pass
 
 
 # ── GPU encoder detection ─────────────────────────────────────────────────────
@@ -1028,6 +1060,11 @@ def _overlay_pipeline(
                 for w in render_cfg.widgets
             )
             for i in range(n_out_frames):
+                # Cooperative stop: break out so stdin is closed and FFmpeg
+                # finishes cleanly, releasing the GPU encoder session. Killing
+                # the thread instead leaves the QSV/D3D11 context orphaned.
+                if _is_cancelled(config):
+                    break
                 # Absolute timestamp of this video frame in the OSD file's timebase.
                 # use_pts: real PTS from ffprobe (handles gaps/dropped packets).
                 # Fallback: i/fps (constant-rate assumption, current legacy behaviour).
@@ -1089,6 +1126,9 @@ def _overlay_pipeline(
         progress_callback(92, f"Encoding…  [{enc_label}]")
 
     ffmpeg_proc.wait()
+
+    if _is_cancelled(config):
+        return CANCELLED
 
     if ffmpeg_proc.returncode not in (0, None):
         err = ffmpeg_stderr[0]
@@ -1259,6 +1299,8 @@ def _chroma_key_pipeline(
                 for w in render_cfg.widgets
             )
             for i in range(n_out_frames):
+                if _is_cancelled(config):
+                    break
                 t_sec    = pts_list[i] if use_pts else i / fps
                 abs_t_ms = int((_t_start + t_sec) * 1000 + config.osd_offset_ms)
 
@@ -1311,6 +1353,9 @@ def _chroma_key_pipeline(
         progress_callback(92, f"Encoding…  [{enc_label}]")
 
     ffmpeg_proc.wait()
+
+    if _is_cancelled(config):
+        return CANCELLED
 
     if ffmpeg_proc.returncode not in (0, None):
         err = ffmpeg_stderr[0]
@@ -1382,6 +1427,8 @@ def _srt_only_pipeline(
     report_every = max(1, total_trimmed // 200)
     try:
         while True:
+            if _is_cancelled(config):
+                break
             raw = _read_exactly(dec_proc.stdout, frame_bytes)
             if raw is None: break
             # Offset frame time by trim_start so SRT lookup uses absolute timestamp
@@ -1407,7 +1454,14 @@ def _srt_only_pipeline(
         try: enc_proc.stdin.close()
         except Exception: pass
 
+    # On cancel, the decoder may be blocked writing into a full stdout pipe that
+    # nobody drains now; terminate it so wait() cannot hang forever.
+    if _is_cancelled(config):
+        _terminate_proc(dec_proc)
     dec_proc.wait(); enc_proc.wait()
+
+    if _is_cancelled(config):
+        return CANCELLED
 
     if enc_proc.returncode not in (0, None):
         err = enc_stderr[0]
@@ -1444,7 +1498,15 @@ def _reencode_only(ffmpeg, config, progress_callback):
     stderr_store = [""]
     proc = _hidden_popen(cmd, stderr=subprocess.PIPE, bufsize=0)
     threading.Thread(target=_drain, args=(proc.stderr, stderr_store), daemon=True).start()
-    proc.wait()
+    # Poll for cancellation instead of a bare wait() so Stop can end this path.
+    cancel_ev = getattr(config, "cancel_event", None)
+    if cancel_ev is not None:
+        while proc.poll() is None:
+            if cancel_ev.wait(0.2):
+                _terminate_proc(proc)
+                return CANCELLED
+    else:
+        proc.wait()
     if proc.returncode != 0:
         err = stderr_store[0]
         if isinstance(err, bytes): err = err.decode("utf-8", errors="replace")

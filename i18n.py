@@ -213,6 +213,7 @@ ZH = {
     '✓ FFmpeg found': '✓ 已找到 FFmpeg',
     '✓ FFmpeg installed successfully': '✓ FFmpeg 安装成功',
     '⏹ Stopped': '⏹ 已停止',
+    '⏹ Stopping…': '⏹ 停止中…',
     '✕': '✕',
     '＋ Add': '＋ 添加',
     '🎨': '🎨',

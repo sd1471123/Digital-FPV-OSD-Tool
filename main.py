@@ -43,7 +43,7 @@ from widgets       import (Widget, widgets_from_list, WIDGET_DATA_SOURCES,
                             TelemetryFrame, invalidate_track_caches)
 from video_processor import (ProcessingConfig, ColorTransConfig, process_video,
                              get_video_info, get_frame_pts, find_ffmpeg,
-                             detect_hw_encoder, detect_libplacebo)
+                             detect_hw_encoder, detect_libplacebo, CANCELLED)
 from splash_screen   import SplashScreen
 import updater
 
@@ -117,24 +117,37 @@ _SL_MAX = 10_000
 class ProcessWorker(QThread):
     progress = pyqtSignal(int, str)
     finished = pyqtSignal(bool, str)
+    cancelled = pyqtSignal()
 
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        self._stop = False
+        # Cooperative cancellation: never call QThread.terminate(). Killing a
+        # thread mid-write (while it owns an FFmpeg pipe / Intel QSV D3D11
+        # context) orphans the GPU encoder session and corrupts heap/state,
+        # which is why stopping a render crashed the whole app. Instead we set
+        # an event the render loops poll; FFmpeg then exits cleanly and frees
+        # the GPU session.
+        self._cancel = threading.Event()
+        cfg.cancel_event = self._cancel
 
     def run(self):
         try:
             result = process_video(self.cfg, lambda p, m: self.progress.emit(p, m))
+            if result is CANCELLED:
+                self.cancelled.emit()
+                return
             # result is True (no warning) or a warning string
             warning = result if isinstance(result, str) else ""
             self.finished.emit(True, warning)
         except Exception as e:
-            self.finished.emit(False, str(e))
+            if self._cancel.is_set():
+                self.cancelled.emit()
+            else:
+                self.finished.emit(False, str(e))
 
     def stop(self):
-        self._stop = True
-        self.terminate()
+        self._cancel.set()
 
 
 class VideoInfoWorker(QThread):
@@ -3560,15 +3573,22 @@ class MainWindow(QMainWindow):
             lambda p, m: (self.prog.setValue(p), self._st(m)),
             Qt.ConnectionType.QueuedConnection)
         self.worker.finished.connect(self._done)
+        self.worker.cancelled.connect(self._on_render_cancelled)
         self.worker.start()
 
     def _stop_render(self):
         if self.worker and self.worker.isRunning():
-            self.worker.stop()
-            self._st(tr("⏹ Stopped"))
-            self.prog.setActive(False)
-            self.render_btn.setEnabled(True)
             self.stop_btn.setEnabled(False)
+            self._st(tr("⏹ Stopping…"))
+            # Signal the render loop to unwind cleanly. Do NOT terminate() the
+            # thread — that crashed the app on Intel QSV GPU encodes.
+            self.worker.stop()
+
+    def _on_render_cancelled(self):
+        self.prog.setActive(False)
+        self.render_btn.setEnabled(True)
+        self.stop_btn.setEnabled(False)
+        self._st(tr("⏹ Stopped"))
 
     def _done(self, ok, msg):
         self.render_btn.setEnabled(True)

@@ -13,6 +13,7 @@ HUD elements directly onto the footage — frame-accurate, GPU-accelerated.
 
 ## What's New in This Fork
 
+- **Crash on "Stop render" fixed**: stopping a render mid-way used to force-kill the render thread (`QThread.terminate()`), leaving an orphaned ffmpeg process holding the Intel QSV GPU session — with GPU encoding enabled, every stop crashed the app. Stopping is now cooperative: the render loop unwinds cleanly, ffmpeg finalizes and releases the GPU session. Renders can now be safely interrupted at any time.
 - **Simplified Chinese UI**: full Chinese / English instant switching (click the 中 / EN button in the title bar). The choice is saved and restored on next launch.
 - **HGLRC Draco (化骨龙龙瞰) `.ts` recording support**: reads the OSD embedded in `.ts` recordings directly (MPEG-TS / H.264 SEI, P1-compatible) — no MP4 conversion needed.
 - **Intel GPU rendering bug fixed**: corrected GPU detection so Intel cards are no longer misdetected as AMD AMF (which prevented QSV from being selectable). Intel QSV (Arc / HD / Iris) is now detected and usable.

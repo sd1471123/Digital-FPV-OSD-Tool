@@ -8,21 +8,42 @@ echo  VueOSD  -  Build standalone .exe
 echo ==============================================
 echo.
 
-:: Activate venv (run.bat must have been run at least once)
-if not exist ".venv\Scripts\activate.bat" (
-    echo No venv found. Run run.bat once first to set up dependencies.
+::: -- Find a usable Python -------------------------------------------------------
+set PYTHON=
+py --version >nul 2>&1 && set PYTHON=py
+if "%PYTHON%"=="" python --version >nul 2>&1 && set PYTHON=python
+if "%PYTHON%"=="" if exist "%USERPROFILE%\.workbuddy\binaries\python\versions\3.14.3\python.exe" set PYTHON="%USERPROFILE%\.workbuddy\binaries\python\versions\3.14.3\python.exe"
+if "%PYTHON%"=="" if exist ".venv\Scripts\python.exe" set PYTHON=".venv\Scripts\python.exe"
+
+if "%PYTHON%"=="" (
+    echo ERROR: No Python found. Run VueOSD.bat once first to set up dependencies.
     pause
     exit /b 1
 )
 
-call .venv\Scripts\activate.bat
+echo Using Python: %PYTHON%
+
+::: -- Use venv if present (it already has the deps), else the detected Python -----
+if exist ".venv\Scripts\activate.bat" (
+    echo Activating .venv...
+    call .venv\Scripts\activate.bat
+    set PYTHON=python
+)
+
+::: -- Make sure dependencies are available ---------------------------------------
+echo Checking dependencies...
+%PYTHON% -c "import PyQt6, numpy, PIL" >nul 2>&1
+if errorlevel 1 (
+    echo Installing dependencies...
+    %PYTHON% -m pip install --quiet -r requirements.txt
+)
 
 echo Installing PyInstaller...
-python -m pip install --quiet pyinstaller
+%PYTHON% -m pip install --quiet pyinstaller
 
 echo.
 echo Building...
-pyinstaller ^
+%PYTHON% -m PyInstaller ^
     --onefile ^
     --windowed ^
     --name "VueOSD" ^

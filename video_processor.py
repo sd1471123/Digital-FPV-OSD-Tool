@@ -323,6 +323,15 @@ _NO_DEVICE_PHRASES = [
     "cannot load libnvcuvid",
     "cannot load libcuda",
     "cuda_error_no_device",
+    # AMF on non-AMD GPUs: the runtime DLL is simply absent
+    "amfrt64.dll failed to open",
+    "failed to create hardware device context (amf)",
+    "failed to create  hardware device context (amf)",
+    # Generic encoder-init failures mean this candidate cannot work here.
+    # Keep probing other candidates instead of falsely reporting a GPU.
+    "error while opening encoder",
+    "could not open encoder before eof",
+    "conversion failed",
 ]
 
 
@@ -370,8 +379,9 @@ def detect_hw_encoder(ffmpeg: str) -> Optional[dict]:
                    "-frames:v", "1",
                    "-vf", "format=nv12,hwupload",
                    "-c:v", h264, "-f", "null", "-"]
-        elif "amf" in h264:
-            # AMF requires nv12 input; yuv420p causes an init failure on some drivers
+        elif "amf" in h264 or "qsv" in h264:
+            # AMF and QSV both require nv12 input; yuv420p causes an init
+            # failure or a silent format conversion on some drivers
             cmd = [ffmpeg, "-y",
                    "-f", "lavfi", "-i", "color=black:size=256x256:rate=30",
                    "-frames:v", "1",

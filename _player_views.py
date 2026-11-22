@@ -20,6 +20,8 @@ from PyQt6.QtGui import (
 from _player_common import PIL_OK, PILImage
 from _player_canvas_edit import RegionEditor, WidgetEditor
 
+_UI_FONT = "'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC',Segoe UI,Arial"
+
 # ── Donate ────────────────────────────────────────────────────────────────────
 
 _DONATE_URL = "https://buymeacoffee.com/failsavefpv"
@@ -355,23 +357,24 @@ class VideoCanvas(QWidget):
         # ── Quick Start ───────────────────────────────────────────────────
         title_y = top
         p.setPen(QPen(QColor(t["subtext"])))
-        p.setFont(QFont("Segoe UI", 13, QFont.Weight.Bold))
+        from i18n import tr
+        p.setFont(QFont(_UI_FONT, 13, QFont.Weight.Bold))
         p.drawText(QRect(lx, title_y, lw, TITLE_H),
-                   Qt.AlignmentFlag.AlignCenter, "Quick Start")
+                   Qt.AlignmentFlag.AlignCenter, tr("Quick Start"))
 
         sep_y = title_y + TITLE_H + SEP_ABOVE
         p.setPen(QPen(QColor(t["border2"])))
         p.drawLine(lx, sep_y, lx + lw, sep_y)
 
         step0_y = sep_y + 1 + STEP_BELOW
-        steps = [
+        steps = [tr(s) for s in [
             "\u2460  Drop a video, .osd or .srt onto the drop zone \u2014 companions auto-load",
             "\u2461  Pick a font style in the left panel",
             "\u2462  Adjust position, opacity and scale; configure the SRT bar",
             "\u2463  Set the output file path, then click  Render",
-        ]
+        ]]
         p.setPen(QPen(QColor(t["muted"])))
-        p.setFont(QFont("Segoe UI", 10))
+        p.setFont(QFont(_UI_FONT, 10))
         for i, line in enumerate(steps):
             p.drawText(QRect(lx, step0_y + i * STEP_PITCH, lw, STEP_H),
                        Qt.AlignmentFlag.AlignLeft, line)
@@ -382,21 +385,21 @@ class VideoCanvas(QWidget):
         if show_kb:
             kb_top = cursor_y + GAP
             p.setPen(QPen(QColor(t["subtext"])))
-            p.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+            p.setFont(QFont(_UI_FONT, 10, QFont.Weight.Bold))
             p.drawText(QRect(lx, kb_top, lw, KB_TITLE_H),
-                       Qt.AlignmentFlag.AlignCenter, "Keyboard Shortcuts")
+                       Qt.AlignmentFlag.AlignCenter, tr("Keyboard Shortcuts"))
 
             kb_sep_y = kb_top + KB_TITLE_H + KB_SEP
             p.setPen(QPen(QColor(t["border2"])))
             p.drawLine(lx, kb_sep_y, lx + lw, kb_sep_y)
 
-            kb_lines = [
+            kb_lines = [tr(s) for s in [
                 "Space  Play / Pause          Left / Right  Step frame",
                 "I / O  Set trim in / out      Home / End  Jump to start / end",
                 "J  Step back  K  Play/Pause  L  Play/Faster    Shift+\u2190/\u2192  Step 10",
-            ]
+            ]]
             p.setPen(QPen(QColor(t["muted"])))
-            p.setFont(QFont("Segoe UI", 9))
+            p.setFont(QFont(_UI_FONT, 9))
             kb0_y = kb_sep_y + 1 + 8
             for i, line in enumerate(kb_lines):
                 p.drawText(QRect(lx, kb0_y + i * KB_PITCH, lw, KB_LINE_H),
@@ -432,12 +435,12 @@ class VideoCanvas(QWidget):
                         p.drawRect(heart_x + ci * px, heart_y + ri * px, px, px)
 
             p.setPen(QPen(QColor(t["muted"])))
-            p.setFont(QFont("Segoe UI", 9))
+            p.setFont(QFont(_UI_FONT, 9))
             p.drawText(QRect(lx, heart_y + heart_h + 4, lw, 16),
-                       Qt.AlignmentFlag.AlignCenter, _DONATE_NOTE)
+                       Qt.AlignmentFlag.AlignCenter, tr(_DONATE_NOTE))
 
             p.setPen(QPen(QColor(t["accent"])))
-            p.setFont(QFont("Segoe UI", 9))
+            p.setFont(QFont(_UI_FONT, 9))
             p.drawText(QRect(lx, heart_y + heart_h + 24, lw, 16),
                        Qt.AlignmentFlag.AlignCenter,
                        "buymeacoffee.com/failsavefpv  \u2197")
@@ -771,7 +774,7 @@ class TransportBar(QWidget):
         self.ref_btn.clicked.connect(self.refreshClicked)
 
         self.preview_quality_combo = QComboBox()
-        self.preview_quality_combo.addItems(["Cached (fast)", "Original (full-res)"])
+        self.preview_quality_combo.addItems([tr("Cached (fast)"), tr("Original (full-res)")])
         self.preview_quality_combo.setFixedHeight(34)
         self.preview_quality_combo.setMinimumWidth(140)
         self.preview_quality_combo.setStyleSheet(

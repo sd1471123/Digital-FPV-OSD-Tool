@@ -59,7 +59,7 @@ def _build_styles():
 
     APP_STYLE = (
         f"QMainWindow,QWidget{{background:{t['bg']};color:{t['text']};"
-        f"font-family:'Segoe UI',Arial,sans-serif;font-size:{_fs(12)}px;}}"
+        f"font-family:'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif;font-size:{_fs(12)}px;}}"
         f"QLabel{{color:{t['text']};}}"
         f"QCheckBox{{color:{t['text']};}}"
         f"QScrollArea{{border:none;}}"

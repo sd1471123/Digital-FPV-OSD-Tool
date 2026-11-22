@@ -250,6 +250,48 @@ ZH = {
     'Voltage (SRT)': '电压（SRT）',
     'fields': '个字段',
     'mAh drawn (OSD)': '已用容量（OSD）',
+    '100% AI-assisted. 0% AI-responsible for the bugs.': '100% AI 辅助，0% AI 负责修 bug。',
+    'Blackbox says: prop strike at 0:42. Donate anyway.': '黑盒记录：0:42 打桨。还是捐吧。',
+    'Built with Claude. Crashed with Betaflight.': '用 Claude 打造，配 Betaflight 炸机。',
+    'Cached (fast)': '缓存（快速）',
+    'Cancel Render': '取消渲染',
+    'Choose output path…': '选择输出路径…',
+    'Claude suggested a paywall. I said no. For now.': 'Claude 建议加付费墙，我拒绝了——暂时。',
+    'Claude wrote the code. I flew into a tree to test it.': 'Claude 写代码，我拿它撞树测试。',
+    'Color': '颜色',
+    'Every donation funds one more prop replacement.': '每笔捐赠都赞助一副新桨叶。',
+    'GPU:': 'GPU：',
+    'Height': '高度',
+    'I / O  Set trim in / out      Home / End  Jump to start / end': 'I / O  设置入点 / 出点      Home / End  跳到开头 / 结尾',
+    'If this saved your footage, maybe save my bank account.': '如果它救了你的素材，或许也救救我的银行账户。',
+    'J  Step back  K  Play/Pause  L  Play/Faster    Shift+←/→  Step 10': 'J  后退  K  播放/暂停  L  播放/加速    Shift+←/→  跳 10 帧',
+    'Keyboard Shortcuts': '快捷键',
+    'Label': '标签',
+    'Link': '链路',
+    'Min / Max': '最小 / 最大',
+    'No props were harmed in the making of this tool. Just all of mine.': '制作这个工具没有损坏任何桨叶——除了我所有的桨叶。',
+    'OSD': 'OSD',
+    'OSD says 4.2V. Battery says otherwise.': 'OSD 显示 4.2V，电池表示不同意。',
+    'Original (full-res)': '原始（全分辨率）',
+    'Output': '输出',
+    'Powered by mass regret and full-throttle into concrete.': '由深深的后悔和全油门撞墙驱动。',
+    'Preview quality': '预览质量',
+    'Quick Start': '快速开始',
+    'Renderer': '渲染器',
+    'Runs on coffee & failed maiden flights.': '靠咖啡和失败的首次飞行驱动。',
+    'Save As': '另存为',
+    'Saved': '已保存',
+    'Space  Play / Pause          Left / Right  Step frame': '空格  播放 / 暂停          左 / 右方向键  逐帧',
+    'Strength': '强度',
+    'The AI did the coding. I did the crashing.': 'AI 负责写代码，我负责炸机。',
+    'This tool is free. My props are not.': '这个工具免费，我的桨叶可不免费。',
+    'True': '真',
+    'Video': '视频',
+    'Width': '宽度',
+    '①  Drop a video, .osd or .srt onto the drop zone — companions auto-load': '①  将视频、.osd 或 .srt 文件拖到拖放区——配套文件会自动加载',
+    '②  Pick a font style in the left panel': '②  在左侧面板选择字体样式',
+    '③  Adjust position, opacity and scale; configure the SRT bar': '③  调整位置、不透明度和缩放；配置 SRT 信息栏',
+    '④  Set the output file path, then click  Render': '④  设置输出文件路径，然后点击「渲染视频」',
 }
 
 
@@ -378,3 +420,11 @@ def apply_language() -> None:
                 retext(action, 'toolTip', 'setToolTip')
         except Exception:
             pass
+
+        # Custom-painted widgets (Quick Start page) need a repaint
+        if hasattr(widget, 'show_quick_start'):
+            try:
+                widget.show_quick_start()
+                widget.update()
+            except Exception:
+                pass

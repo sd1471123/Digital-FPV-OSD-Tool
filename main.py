@@ -194,7 +194,7 @@ class RenderBar(QWidget):
 
         # Text
         p.setPen(QColor(t['text'] if self._active else t['muted']))
-        p.setFont(QFont("Segoe UI", 9))
+        p.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 9))
         if self._active and self._value > 0:
             label = f"{self._value}%"
         elif self._active:
@@ -403,12 +403,12 @@ class MainWindow(QMainWindow):
         title_box.setSpacing(6)
 
         h1 = QLabel(tr("VueOSD"))
-        h1.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
+        h1.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 18, QFont.Weight.Bold))
         h1.setStyleSheet(f"color:{_T()['text']};")
         self._h1 = h1
 
         ver = QLabel(f"v{VERSION}")
-        ver.setFont(QFont("Segoe UI", _fs(10)))
+        ver.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", _fs(10)))
         ver.setStyleSheet(f"color:{_T()['muted']};")
         self._h2 = ver
         self._ver_lbl = ver  # legacy alias for theme reapply code
@@ -436,7 +436,7 @@ class MainWindow(QMainWindow):
         self._palette_btn.setToolTip(tr("Open theme colour editor"))
         self._palette_btn.setStyleSheet(_btn_css)
         self._palette_btn.setText(tr("🎨"))
-        self._palette_btn.setFont(QFont("Segoe UI", 13))
+        self._palette_btn.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 13))
         self._palette_btn.clicked.connect(self._open_theme_editor)
         self._theme_editor_dlg = None   # lazily created
 
@@ -915,7 +915,7 @@ class MainWindow(QMainWindow):
         cl.setSpacing(8)
 
         self._prev_lbl = QLabel(tr("Preview"))
-        self._prev_lbl.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        self._prev_lbl.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 12, QFont.Weight.Bold))
         self._prev_lbl.setStyleSheet(f"color:{_T()['subtext']}")
         cl.addWidget(self._prev_lbl)
 
@@ -1386,7 +1386,7 @@ class MainWindow(QMainWindow):
         self._upscale_lbl = QLabel(tr("Upscale output:"))
         self._upscale_lbl.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.upscale_combo = QComboBox()
-        self.upscale_combo.addItems(["Off", "1440p  (2560×1440)", "2.7K  (2688×1512)", "4K  (3840×2160)"])
+        self.upscale_combo.addItems([tr("Off"), "1440p  (2560×1440)", "2.7K  (2688×1512)", "4K  (3840×2160)"])
         self.upscale_combo.setStyleSheet(S.COMBO_STYLE)
         self.upscale_combo.setToolTip(
             tr("Scale the output video to a higher resolution using Lanczos.\n"
@@ -1401,7 +1401,7 @@ class MainWindow(QMainWindow):
         self._aspect_lbl = QLabel(tr("Aspect ratio:"))
         self._aspect_lbl.setStyleSheet(f"color:{_T()['text']};font-size:11px;")
         self.aspect_combo = QComboBox()
-        self.aspect_combo.addItems(["Source", "16:9", "4:3", "21:9", "1:1", "9:16"])
+        self.aspect_combo.addItems([tr("Source"), "16:9", "4:3", "21:9", "1:1", "9:16"])
         self.aspect_combo.setStyleSheet(S.COMBO_STYLE)
         self.aspect_combo.setToolTip(
             tr("Pad the video into a wider or taller canvas with black bars.\n"
@@ -1463,7 +1463,7 @@ class MainWindow(QMainWindow):
         self.render_btn = QPushButton(tr("  Render Video"))
         self.render_btn.setIcon(_icon("render.png", 18))
         self.render_btn.setFixedHeight(36)
-        self.render_btn.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        self.render_btn.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 10, QFont.Weight.Bold))
         self.render_btn.setStyleSheet(S.BTN_PRIMARY)
         self.render_btn.clicked.connect(self._render)
 
@@ -1795,11 +1795,11 @@ class MainWindow(QMainWindow):
             f"QPushButton{{background:transparent;border:none;border-radius:15px;}}"
             f"QPushButton:hover{{background:{t['surface']};}}"
         )
-        self._h1.setFont(QFont("Segoe UI", _fs(16), QFont.Weight.Bold))
+        self._h1.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", _fs(16), QFont.Weight.Bold))
         self._h1.setStyleSheet(f"color:{t['text']};")
-        self._ver_lbl.setFont(QFont("Segoe UI", _fs(8)))
+        self._ver_lbl.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", _fs(8)))
         self._ver_lbl.setStyleSheet(f"color:{t['muted']};")
-        self._h2.setFont(QFont("Segoe UI", _fs(16), QFont.Weight.Bold))
+        self._h2.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", _fs(16), QFont.Weight.Bold))
         self._h2.setStyleSheet(f"color:{t['text']};")
         self._scale_lbl.setStyleSheet(f"color:{t['muted']};font-size:{_fs(10)}px;")
         self._prev_lbl.setStyleSheet(f"color:{t['subtext']};")

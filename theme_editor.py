@@ -157,7 +157,7 @@ class PalettePanel(QWidget):
 
         # Column title
         title_lbl = QLabel(title)
-        title_lbl.setFont(QFont("Segoe UI", 13, QFont.Weight.Bold))
+        title_lbl.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 13, QFont.Weight.Bold))
         title_lbl.setStyleSheet("color:#e8e8e0;padding:0 0 10px 0;")
         outer.addWidget(title_lbl)
 
@@ -244,7 +244,7 @@ class PreviewStrip(QWidget):
             p.setBrush(QBrush(QColor(pal.get("surface", "#313244"))))
             p.drawRoundedRect(x_off+8, 12, 60, 22, 5, 5)
             p.setPen(QPen(QColor(pal.get("text", "#cdd6f4"))))
-            p.setFont(QFont("Segoe UI", 8))
+            p.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 8))
             p.drawText(x_off+8, 12, 60, 22, Qt.AlignmentFlag.AlignCenter, "Button")
 
             # accent pill (primary button)
@@ -252,12 +252,12 @@ class PreviewStrip(QWidget):
             p.setBrush(QBrush(QColor(pal.get("accent", "#89b4fa"))))
             p.drawRoundedRect(x_off+76, 12, 70, 22, 5, 5)
             p.setPen(QPen(QColor("#ffffff")))
-            p.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
+            p.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 8, QFont.Weight.Bold))
             p.drawText(x_off+76, 12, 70, 22, Qt.AlignmentFlag.AlignCenter, "Render")
 
             # text
             p.setPen(QPen(QColor(pal.get("text", "#cdd6f4"))))
-            p.setFont(QFont("Segoe UI", 8))
+            p.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 8))
             p.drawText(x_off+154, 12, 60, 10, Qt.AlignmentFlag.AlignLeft, "VueOSD")
             p.setPen(QPen(QColor(pal.get("muted", "#6c7086"))))
             p.drawText(x_off+154, 26, 70, 10, Qt.AlignmentFlag.AlignLeft, "Ready")
@@ -270,7 +270,7 @@ class PreviewStrip(QWidget):
 
             # label
             p.setPen(QPen(QColor(pal.get("subtext", "#888"))))
-            p.setFont(QFont("Segoe UI", 7))
+            p.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 7))
             p.drawText(x_off, h-10, half, 10, Qt.AlignmentFlag.AlignCenter, label)
 
         _draw_side(0,        self._get_dark(),  "Dark theme")
@@ -310,7 +310,7 @@ class ThemeEditor(QDialog):
         # ── Header ────────────────────────────────────────────────────────────
         hdr = QHBoxLayout()
         title = QLabel(tr("Theme Editor"))
-        title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        title.setFont(QFont("'Microsoft YaHei UI','Microsoft YaHei','PingFang SC',Segoe UI,Arial", 16, QFont.Weight.Bold))
         title.setStyleSheet("color:#e8e8e0;")
         sub = QLabel(tr("Click a swatch or type a hex value  •  Changes preview live"))
         sub.setStyleSheet("color:#505060;font-size:11px;")

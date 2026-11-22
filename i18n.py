@@ -317,6 +317,16 @@ ZH = {
     'SIZE & POSITION': '大小与位置',
     'Show map': '显示地图',
     'Smoothness': '平滑度',
+    'Auto-detected': '自动检测',
+    'Browse': '浏览',
+    'Choose output path…': '选择输出路径…',
+    'GLSL': 'GLSL',
+    'OSD': 'OSD',
+    'Optional .glsl shader…': '可选 .glsl 着色器…',
+    'Output': '输出',
+    'SRT': 'SRT',
+    'Select video…': '选择视频…',
+    'Video': '视频',
 }
 
 

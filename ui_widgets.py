@@ -50,7 +50,7 @@ class FileRow(QWidget):
             icon_lbl.setFixedSize(16, 16)
             lbl_row.addWidget(icon_lbl)
             self._icon_lbl = icon_lbl
-        lbl = QLabel(label)
+        lbl = QLabel(tr(label))
         lbl.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
         lbl.setStyleSheet(f"color:{_T()['subtext']}")
         self._name_lbl = lbl   # stored for theme reapply
@@ -59,14 +59,14 @@ class FileRow(QWidget):
         lbl_container.setFixedWidth(72)
         lbl_container.setLayout(lbl_row)
 
-        self.path_lbl = QLabel(placeholder)
+        self.path_lbl = QLabel(tr(placeholder))
         self.path_lbl.setStyleSheet(S.PATH_EMPTY)
         self.path_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.path_lbl.setFixedHeight(28)
         self.path_lbl.setMinimumWidth(60)
         self.path_lbl.setTextFormat(Qt.TextFormat.PlainText)
 
-        self.btn = QPushButton("Save As" if save_mode else "Browse")
+        self.btn = QPushButton(tr("Save As") if save_mode else tr("Browse"))
         self.btn.setFixedSize(68, 28)
         self.btn.setStyleSheet(S.BTN_SEC)
         self.btn.clicked.connect(self._browse)

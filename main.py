@@ -487,11 +487,11 @@ class MainWindow(QMainWindow):
         self.drop_zone.files_dropped.connect(self._on_files_dropped)
         fgl.addWidget(self.drop_zone)
 
-        self.video_row = FileRow("Video",  "Select video…",  "Video (*.mp4 *.ts *.mkv *.avi *.mov)",
+        self.video_row = FileRow(tr("Video"),  tr("Select video…"),  "Video (*.mp4 *.ts *.mkv *.avi *.mov)",
                                  icon=_icon("video.png", 16), icon_name="video.png")
-        self.osd_row   = FileRow("OSD",    "Auto-detected",  "OSD (*.osd)",
+        self.osd_row   = FileRow(tr("OSD"),    tr("Auto-detected"),  "OSD (*.osd)",
                                  icon=_icon("gear.png",  16), icon_name="gear.png")
-        self.srt_row   = FileRow("SRT",    "Auto-detected",  "SRT (*.srt)",
+        self.srt_row   = FileRow(tr("SRT"),    tr("Auto-detected"),  "SRT (*.srt)",
                                  icon=_icon("wifi.png",  16), icon_name="wifi.png")
         self.video_row.btn.clicked.disconnect()
         self.video_row.btn.clicked.connect(self._on_video)
@@ -1109,8 +1109,8 @@ class MainWindow(QMainWindow):
         cards_layout = QHBoxLayout(cards_widget)
         cards_layout.setContentsMargins(0, 0, 0, 0)
         cards_layout.setSpacing(6)
-        self.vid_card = InfoCard("Video")
-        self.osd_card = InfoCard("OSD")
+        self.vid_card = InfoCard(tr("Video"))
+        self.osd_card = InfoCard(tr("OSD"))
         self.srt_card = InfoCard("📡 Link")
         cards_layout.addWidget(self.vid_card)
         cards_layout.addWidget(self.osd_card)
@@ -1192,7 +1192,7 @@ class MainWindow(QMainWindow):
         ccl.addWidget(_sep())
 
         # Custom GLSL shader
-        self.cc_glsl_row = FileRow("GLSL", "Optional .glsl shader…",
+        self.cc_glsl_row = FileRow(tr("GLSL"), tr("Optional .glsl shader…"),
                                     "GLSL Shaders (*.glsl *.hook)")
         self.cc_glsl_row.btn.clicked.disconnect()
         self.cc_glsl_row.btn.clicked.connect(self._cc_browse_glsl)
@@ -1273,7 +1273,7 @@ class MainWindow(QMainWindow):
         encgl.setContentsMargins(10, 14, 10, 8)
 
         # Output file row
-        self.out_row = FileRow("Output", "Choose output path…", "", save_mode=True, icon=_icon("save.png", 16), icon_name="save.png")
+        self.out_row = FileRow(tr("Output"), tr("Choose output path…"), "", save_mode=True, icon=_icon("save.png", 16), icon_name="save.png")
         encgl.addWidget(self.out_row)
 
         encgl.addWidget(_sep())

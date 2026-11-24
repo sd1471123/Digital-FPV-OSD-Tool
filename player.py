@@ -29,6 +29,27 @@ from video_processor import find_ffmpeg, get_frame_pts
 from osd_renderer import OsdRenderConfig, render_osd_frame, render_fallback
 
 
+class TrimTimeLabel(QLabel):
+    """Trim marker label ("In: 0:00") whose prefix follows the UI language."""
+
+    def __init__(self, prefix: str, time_text: str = "0:00"):
+        super().__init__()
+        self._prefix = prefix          # i18n key, e.g. "In: "
+        self._time = time_text
+        self._update_text()
+
+    def set_time(self, time_text: str):
+        self._time = time_text
+        self._update_text()
+
+    def retranslate(self):
+        """Called by i18n.apply_language() after a language switch."""
+        self._update_text()
+
+    def _update_text(self):
+        self.setText(tr(self._prefix) + self._time)
+
+
 # ─── PlayerController ─────────────────────────────────────────────────────────
 
 class PlayerController:
@@ -511,8 +532,8 @@ class PlayerPanel(QWidget):
         trim_lay.setContentsMargins(0, 0, 0, 0)
         trim_lay.setSpacing(4)
         t = theme_fn()
-        self.trim_in_lbl = QLabel(tr("In: 0:00"))
-        self.trim_out_lbl = QLabel(tr("Out: \u2014"))
+        self.trim_in_lbl = TrimTimeLabel("In: ")
+        self.trim_out_lbl = TrimTimeLabel("Out: ", "\u2014")
         for lb in (self.trim_in_lbl, self.trim_out_lbl):
             lb.setStyleSheet(f"color:{t['subtext']};font-size:10px;font-weight:bold;")
         self.trim_rst_btn = QPushButton(tr("\u2715"))

@@ -1665,7 +1665,7 @@ class MainWindow(QMainWindow):
     def _custom_font(self):
         """Import a font PNG — copies it into fonts/ for permanent use."""
         from font_loader import import_font
-        p, _ = QFileDialog.getOpenFileName(self, "Select Font PNG", "", "PNG (*.png)")
+        p, _ = QFileDialog.getOpenFileName(self, tr("Select Font PNG"), "", "PNG (*.png)")
         if not p:
             return
         # Derive a clean name from the filename
@@ -1956,7 +1956,7 @@ class MainWindow(QMainWindow):
         self._refresh_preview()
 
     def _on_video(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select Video", "",
+        p, _ = QFileDialog.getOpenFileName(self, tr("Select Video"), "",
                                             "Video (*.mp4 *.ts *.mkv *.avi *.mov)")
         if not p: return
         self.video_row.set_path(p)
@@ -1968,11 +1968,11 @@ class MainWindow(QMainWindow):
         self._auto_detect(p, have_video=True)
 
     def _manual_osd(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select OSD File", "", "OSD (*.osd)")
+        p, _ = QFileDialog.getOpenFileName(self, tr("Select OSD File"), "", "OSD (*.osd)")
         if p: self.osd_row.set_path(p); self._load_osd(p)
 
     def _manual_srt(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select SRT File", "", "SRT (*.srt)")
+        p, _ = QFileDialog.getOpenFileName(self, tr("Select SRT File"), "", "SRT (*.srt)")
         if p: self.srt_row.set_path(p); self._load_srt(p)
 
     def _load_video(self, path):
@@ -3040,11 +3040,11 @@ class MainWindow(QMainWindow):
 
         # Mark preset as "Custom" if user is not loading a preset
         if not self._cc_loading_preset:
-            idx = self.cc_preset_cb.findText("Custom")
+            idx = self.cc_preset_cb.findData("Custom")
             if idx < 0:
                 self.cc_preset_cb.blockSignals(True)
-                self.cc_preset_cb.addItem(tr("Custom"))
-                self.cc_preset_cb.setCurrentText("Custom")
+                self.cc_preset_cb.addItem(tr("Custom"), "Custom")
+                self.cc_preset_cb.setCurrentIndex(self.cc_preset_cb.count() - 1)
                 self.cc_preset_cb.blockSignals(False)
             else:
                 self.cc_preset_cb.blockSignals(True)
@@ -3073,7 +3073,7 @@ class MainWindow(QMainWindow):
         self._player_panel.controller.set_color_vf("")
 
     def _cc_browse_glsl(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select GLSL Shader", "",
+        p, _ = QFileDialog.getOpenFileName(self, tr("Select GLSL Shader"), "",
                                             "GLSL Shaders (*.glsl *.hook)")
         if p:
             self.cc_glsl_row.set_path(p)
@@ -3119,11 +3119,11 @@ class MainWindow(QMainWindow):
                     pass
 
         for name in self._cc_presets:
-            self.cc_preset_cb.addItem(name)
+            self.cc_preset_cb.addItem(tr(name), name)
         self.cc_preset_cb.blockSignals(False)
 
     def _on_cc_preset_changed(self, idx):
-        name = self.cc_preset_cb.currentText()
+        name = self.cc_preset_cb.currentData() or self.cc_preset_cb.currentText()
         if name == "Custom" or name not in self._cc_presets:
             return
         data = self._cc_presets[name]
@@ -3152,7 +3152,7 @@ class MainWindow(QMainWindow):
 
     def _cc_save_preset(self):
         name, ok = QFileDialog.getSaveFileName(
-            self, "Save Color Preset", "", "JSON (*.json)")
+            self, tr("Save Color Preset"), "", "JSON (*.json)")
         if not name or not ok:
             return
         if not name.endswith(".json"):
@@ -3180,9 +3180,9 @@ class MainWindow(QMainWindow):
             with open(name, "w") as f:
                 json.dump(data, f, indent=2)
             self._cc_scan_presets()
-            self._st(f"Preset saved: {os.path.basename(name)}")
+            self._st(tr("Preset saved") + f": {os.path.basename(name)}")
         except Exception as e:
-            self._st(f"Failed to save preset: {e}")
+            self._st(tr("Failed to save preset") + f": {e}")
 
     def _cc_reset_defaults(self):
         """Reset all color correction sliders to Reverse ColorTrans defaults."""
@@ -3203,7 +3203,7 @@ class MainWindow(QMainWindow):
         self.cc_glsl_row.set_path("")
         self._cc_glsl_warn.setVisible(False)
         # Select Reverse ColorTrans preset if it exists
-        idx = self.cc_preset_cb.findText(tr("Reverse ColorTrans"))
+        idx = self.cc_preset_cb.findData("Reverse ColorTrans")
         if idx >= 0:
             self.cc_preset_cb.blockSignals(True)
             self.cc_preset_cb.setCurrentIndex(idx)
@@ -3230,7 +3230,7 @@ class MainWindow(QMainWindow):
             "g_mult": cc.g_mult,
             "b_mult": cc.b_mult,
             "glsl_shader": cc.glsl_shader,
-            "preset": self.cc_preset_cb.currentText(),
+            "preset": self.cc_preset_cb.currentData() or "",
         }
         _save_settings(colortrans=ct_data)
 
@@ -3260,7 +3260,9 @@ class MainWindow(QMainWindow):
                 self.cc_glsl_row.set_path(glsl)
             preset = ct.get("preset", "")
             if preset:
-                idx = self.cc_preset_cb.findText(preset)
+                idx = self.cc_preset_cb.findData(preset)
+                if idx < 0:                       # legacy settings stored display text
+                    idx = self.cc_preset_cb.findText(preset)
                 if idx >= 0:
                     self.cc_preset_cb.setCurrentIndex(idx)
         finally:
@@ -3277,8 +3279,8 @@ class MainWindow(QMainWindow):
         return f"{m}:{s:02d}"
 
     def _on_trim_changed(self, in_pct, out_pct):
-        self.trim_in_lbl.setText(f"In: {self._fmt_trim_time(in_pct)}")
-        self.trim_out_lbl.setText(f"Out: {self._fmt_trim_time(out_pct)}")
+        self.trim_in_lbl.set_time(self._fmt_trim_time(in_pct))
+        self.trim_out_lbl.set_time(self._fmt_trim_time(out_pct))
         self._refresh_preview()
 
     @staticmethod
@@ -3598,7 +3600,7 @@ class MainWindow(QMainWindow):
             self.prog.setActive(False)
             out_path = self.out_row.path
             out_dir  = os.path.dirname(os.path.abspath(out_path))
-            self._st(f"✓ Saved: {out_path}")
+            self._st("✓ " + tr("Saved: ") + out_path)
             # Show warning in label if OSD was trimmed
             if msg:
                 self.osd_warn.setText(f"⚠ {msg}")
@@ -3606,9 +3608,9 @@ class MainWindow(QMainWindow):
 
             dlg = QMessageBox(self)
             dlg.setWindowTitle(tr("Done!"))
-            dlg.setText(f"Saved to:\n{out_path}")
+            dlg.setText(tr("Saved to:") + f"\n{out_path}")
             dlg.setIcon(QMessageBox.Icon.Information)
-            open_btn = dlg.addButton("  Open Folder", QMessageBox.ButtonRole.ActionRole)
+            open_btn = dlg.addButton("  " + tr("Open Folder"), QMessageBox.ButtonRole.ActionRole)
             dlg.addButton(QMessageBox.StandardButton.Ok)
             dlg.exec()
             if dlg.clickedButton() == open_btn:
@@ -3616,7 +3618,7 @@ class MainWindow(QMainWindow):
         else:
             self.prog.setActive(False)
             self._st(f"✗ {msg}")
-            QMessageBox.critical(self, tr("Error"), f"Render failed:\n{msg}")
+            QMessageBox.critical(self, tr("Error"), tr("Render failed:") + f"\n{msg}")
 
     def _open_folder(self, folder):
         if sys.platform == "win32":

@@ -84,11 +84,11 @@ class FileRow(QWidget):
 
     def _browse(self):
         if self.save_mode:
-            p, _ = QFileDialog.getSaveFileName(self, "Save", "", "MP4 (*.mp4)")
+            p, _ = QFileDialog.getSaveFileName(self, tr("Save"), "", "MP4 (*.mp4)")
             if p and not p.lower().endswith(".mp4"):
                 p += ".mp4"
         else:
-            p, _ = QFileDialog.getOpenFileName(self, "Select", "", self.filter_str)
+            p, _ = QFileDialog.getOpenFileName(self, tr("Select"), "", self.filter_str)
         if p:
             self.set_path(p)
 

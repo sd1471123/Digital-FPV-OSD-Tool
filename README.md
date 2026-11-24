@@ -6,7 +6,13 @@
 
 读取与视频一同录制的 `.osd` 和 `.srt` 文件，将 HUD 元素直接渲染到画面上——逐帧精确，GPU 硬件加速。
 
-![VueOSD](https://github.com/user-attachments/assets/eab2d3aa-94e0-401b-9568-39ad38457fd3)
+**中文界面**
+
+![VueOSD 中文界面](docs/screenshots/ui-zh.png)
+
+**English UI**
+
+![VueOSD English UI](docs/screenshots/ui-en.png)
 
 ---
 
